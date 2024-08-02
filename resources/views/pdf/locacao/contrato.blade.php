@@ -300,7 +300,7 @@
 
 <table style="width: 100%">
     <tr>
-      <td><img src="{{ asset('imagem/logo.png') }}" alt="Logo"></td>
+      <td><img src="{{ asset('imagem/logo-lucena.png') }}" alt="Logo"></td>
       <td> <p style="width: 100%; font-size:20px; font-weight: bold" align="center">Contrato de Locação de Veículos</p>
            
       </td>
