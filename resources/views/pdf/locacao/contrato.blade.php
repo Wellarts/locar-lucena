@@ -398,7 +398,7 @@
             LOCATÁRIO: {{$locacao->Cliente->nome}}<br><Br><br><br>
 
             ___________________________________________________________<br>
-            LOCADOR: MOTOMASTER CAMPO GRANDE LTDA.
+            LOCADOR: LOCADORA LUCENA.
 
 
 
