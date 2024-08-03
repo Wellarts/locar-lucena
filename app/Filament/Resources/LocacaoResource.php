@@ -58,11 +58,13 @@ class LocacaoResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('cliente_id')
                                     ->label('Cliente')
+                                    ->searchable()
+                                    ->native(false)
                                     ->columnSpan([
                                         'xl' => 2,
                                         '2xl' => 2,
                                     ])
-                                    ->reactive()
+                                    ->live()
                                     ->required(false)
                                     ->options(Cliente::all()->pluck('nome', 'id')->toArray())
                                     ->afterStateUpdated(function ($state, callable $set, Get $get) {
@@ -259,7 +261,7 @@ class LocacaoResource extends Resource
 
                             ]),
                     ]),
-                    
+
                 Fieldset::make('Ocorrências da Locação')
                     ->schema([
                         Repeater::make('ocorrencia')
@@ -285,7 +287,7 @@ class LocacaoResource extends Resource
                                     ->columnSpan(2)
                                     ->autosize()
                                     ->label('Descrição'),
-                                
+
                                 ToggleButtons::make('status')
                                     ->label('Concluído?')
                                     ->default(false)
