@@ -413,7 +413,8 @@ class LocacaoResource extends Resource
             ])
             ->filters([
                 Filter::make('Locados')
-                    ->query(fn (Builder $query): Builder => $query->where('status', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('status', false))
+                    ->default(1),
                 SelectFilter::make('cliente')->searchable()->relationship('cliente', 'nome'),
                 SelectFilter::make('veiculo')->searchable()->relationship('veiculo', 'placa'),
                 Tables\Filters\Filter::make('datas')
