@@ -47,7 +47,7 @@ class LocacaoResource extends Resource
 
     protected static ?string $navigationGroup = 'Locar';
 
-    
+
 
     public static function form(Form $form): Form
     {
@@ -92,7 +92,9 @@ class LocacaoResource extends Resource
                                     ->searchable(['modelo', 'placa'])
                                     ->afterStateUpdated(function (Set $set, $state) {
                                         $veiculo = Veiculo::find($state);
-                                        $set('km_saida', $veiculo->km_atual);
+                                        if ($state != null) {
+                                            $set('km_saida', $veiculo->km_atual);
+                                        }
                                     })
                                     ->columnSpan([
                                         'xl' => 2,
@@ -294,7 +296,7 @@ class LocacaoResource extends Resource
                                                 'danos_terceiros' => 'Danos a Terceiros',
                                                 'outro' => 'Outros',
                                             ]),
-                                          
+
                                         DateTimePicker::make('data_hora'),
                                         TextInput::make('valor'),
                                         Textarea::make('descricao')
@@ -314,11 +316,11 @@ class LocacaoResource extends Resource
                             ->columnSpanFull()
                             ->addActionLabel('Novo')
                     ]),
-                    ToggleButtons::make('status')
+                ToggleButtons::make('status')
                     ->options([
                         '0' => 'Locado',
                         '1' => 'Finalizar',
-                        
+
                     ])
                     ->colors([
                         '0' => 'danger',
@@ -362,7 +364,7 @@ class LocacaoResource extends Resource
                     ->label('Data Retorno')
                     ->date('d/m/Y'),
                 Tables\Columns\TextColumn::make('hora_retorno')
-                        ->date('H:m')
+                    ->date('H:m')
                     ->label('Hora Retorno'),
                 Tables\Columns\TextColumn::make('Km_Percorrido')
                     ->label('Km Total')
@@ -409,7 +411,7 @@ class LocacaoResource extends Resource
             ])
             ->filters([
                 Filter::make('Locados')
-                ->query(fn (Builder $query): Builder => $query->where('status', false)),
+                    ->query(fn (Builder $query): Builder => $query->where('status', false)),
                 SelectFilter::make('cliente')->searchable()->relationship('cliente', 'nome'),
                 SelectFilter::make('veiculo')->searchable()->relationship('veiculo', 'placa'),
                 Tables\Filters\Filter::make('datas')
