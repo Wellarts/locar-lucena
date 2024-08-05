@@ -47,6 +47,8 @@ class LocacaoResource extends Resource
 
     protected static ?string $navigationGroup = 'Locar';
 
+    
+
     public static function form(Form $form): Form
     {
         return $form
@@ -60,6 +62,8 @@ class LocacaoResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('cliente_id')
                                     ->label('Cliente')
+                                    ->searchable()
+                                    ->native(false)
                                     ->columnSpan([
                                         'xl' => 2,
                                         '2xl' => 2,
@@ -368,16 +372,16 @@ class LocacaoResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('qtd_diarias')
                     ->label('Qtd Diárias'),
-                Tables\Columns\TextColumn::make('valor_total')
-                    ->money('BRL')
-                    ->label('Valor Total'),
-                Tables\Columns\TextColumn::make('valor_desconto')
-                    ->money('BRL')
-                    ->label('Desconto'),
+                // Tables\Columns\TextColumn::make('valor_total')
+                //     ->money('BRL')
+                //     ->label('Valor Total'),
+                // Tables\Columns\TextColumn::make('valor_desconto')
+                //     ->money('BRL')
+                //     ->label('Desconto'),
                 Tables\Columns\TextColumn::make('valor_total_desconto')
                     ->summarize(Sum::make()->money('BRL')->label('Total'))
                     ->money('BRL')
-                    ->label('Valor Total com Desconto'),
+                    ->label('Valor Total'),
                 Tables\Columns\TextColumn::make('status')
                     ->Label('Status')
                     ->badge()

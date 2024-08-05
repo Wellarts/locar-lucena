@@ -11,9 +11,11 @@ use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontFamily;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -117,8 +119,19 @@ class AgendamentoResource extends Resource
                                     ->required(),
                                 Forms\Components\Textarea::make('obs')
                                     ->label('Observações'),
-                                Forms\Components\Toggle::make('status')
-                                    ->label('Finalizar Agendamento'),
+                                ToggleButtons::make('status')
+                                    ->options([
+                                        '0' => 'Agendar',
+                                        '1' => 'Finalizar',
+                                        
+                                    ])
+                                    ->colors([
+                                        '0' => 'danger',
+                                        '1' => 'success',
+                                    ])
+                                    ->inline()
+                                    ->default(0)
+                                    ->label('Status'),
 
                             ]),
                     ]),
@@ -128,18 +141,17 @@ class AgendamentoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('status', '0')
             ->columns([
                 Tables\Columns\TextColumn::make('cliente.nome')
                     ->sortable()
                     ->searchable()
                     ->label('Cliente'),
                 Tables\Columns\TextColumn::make('veiculo.modelo')
+                   // ->fontFamily(FontFamily::Mono)
                     ->sortable()
                     ->searchable()
                     ->label('Veículo'),
-                Tables\Columns\TextColumn::make('veiculo.placa')
-                    ->searchable()
-                    ->label('Placa'),
                 Tables\Columns\TextColumn::make('data_saida')
                     ->label('Data Saída')
                     ->date(),
@@ -156,9 +168,9 @@ class AgendamentoResource extends Resource
                 Tables\Columns\TextColumn::make('valor_total')
                     ->label('Valor Total')
                     ->money('BRL'),
-                Tables\Columns\TextColumn::make('valor_desconto')
-                    ->label('Valor Desconto')
-                    ->money('BRL'),
+                // Tables\Columns\TextColumn::make('valor_desconto')
+                //     ->label('Valor Desconto')
+                //     ->money('BRL'),
                 Tables\Columns\TextColumn::make('valor_pago')
                     ->label('Valor Pago')
                     ->money('BRL'),
@@ -167,8 +179,22 @@ class AgendamentoResource extends Resource
                     ->money('BRL'),
                 Tables\Columns\TextColumn::make('obs')
                     ->label('Observações'),
-                Tables\Columns\ToggleColumn::make('status')
-                    ->label('Finalizado'),
+                    Tables\Columns\TextColumn::make('status')
+                    ->Label('Status')
+                    ->badge()
+                    ->alignCenter()
+                    ->color(fn (string $state): string => match ($state) {
+                        '0' => 'danger',
+                        '1' => 'success',
+                    })
+                    ->formatStateUsing(function ($state) {
+                        if ($state == 0) {
+                            return 'Agendado';
+                        }
+                        if ($state == 1) {
+                            return 'Finalizado';
+                        }
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
