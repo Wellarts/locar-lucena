@@ -28,7 +28,7 @@
 
     #ficha td {
     border: 1px solid rgb(160 160 160);
-    padding: 0px 0px;
+    padding: 0px 2px;
     }
 
 
@@ -113,7 +113,7 @@
 </table>
 </table>
 <div class="retangulo">
-<span class="texto">VEÍCULO</span>
+    <span class="texto">VEÍCULO</span>
 </div>
 <table class="tabelas" id='ficha'>
 <tr>
@@ -201,7 +201,7 @@
                 <td>
                     <h3>Inspeção de Veículo</h3>
                     <tr>
-                        <td>() Documento</td>
+                        <td>( ) Documento</td>
                     </tr>
                     <tr>
                         <td>( ) Calota</td>
@@ -236,64 +236,62 @@
                     <tr>
                         <td>( ) Pen Driver</td>
                     </tr>
-                </td> 
-            </tr>   
-        </table>    
-        
+                </td>
+            </tr>
+        </table>
+
     </div>
-    
-    <div class="tela">
-       <table style="width: 100%"> 
+</div>
+<div style="margin-left: 300px">
+    <table style="width: 100%">
         <tr>
-            <td><p style="margin: 10%">Lajedo, 
-                
-                {{ $dataAtual->formatLocalized('%d de %B de %Y') }}
-            </p></td>
+            <td><p style="margin-left: 90px">Lajedo, {{ $dataAtual->isoFormat('DD MMMM YYYY') }}</p></td>
         </tr>
+        <br><br><br>
         <tr>
             <td>
                 <tr>
-                    <td>_________________________________________<br>
+                    <td><center>_________________________________________</center><br>
                                     <center>Locador</center>
                     <p style = "font-size:10px; text-align: center">Proprietário ou representante legal da Empresa</p>
                     </td>
                 </tr>
-                   
+
             </td>
         </tr>
-       
+
         <tr>
             <td>
                 <tr>
                     <td>
                         <div>
-                            _________________________________________<br>
+                           <center> _________________________________________</center><br>
                                     <center>Locatário</center>
-                                    <p style = "font-size:10px; text-align: justify">Pelo Presente termo, o LOATÁRIO autoriza a LOCADORA a 
-                                    encaminhar ao Depatarmento de Trânsito, em nome do(s) motorista(s) que utilizar(em) 
-                                    o(s) veículo acima, a(s) decorrente(s) de infrações eventualmente cometidas, 
+                                    <p style = "font-size:10px; text-align: justify">Pelo Presente termo, o LOATÁRIO autoriza a LOCADORA a
+                                    encaminhar ao Depatarmento de Trânsito, em nome do(s) motorista(s) que utilizar(em)
+                                    o(s) veículo acima, a(s) decorrente(s) de infrações eventualmente cometidas,
                                     no período de locação. </p>
-                        </div>            
+                        </div>
                     </td>
                 </tr>
-   
+
             </td>
         </tr>
        </table>
-    </div>
+
 </div>
 
 
 <!-- PÁGINA 2 -->
 
 <style>
-    .break { 
+    .break {
         page-break-before: always;
          }
     .parag {
         text-align: justify;
         font-size: 11;
-    }     
+    }
 </style>
 
 <div class="break">
@@ -302,9 +300,9 @@
     <tr>
       <td><img src="{{ asset('img/logo-lucena.png') }}" alt="Image" height="60" width="180"></td>
       <td> <p style="width: 100%; font-size:20px; font-weight: bold" align="center">Contrato de Locação de Veículos</p>
-           
+
       </td>
-  </tr>  
+  </tr>
   </table>
 </div>
 <div>
@@ -408,7 +406,7 @@
         direito regressivo.<br><br>
         4.3. No caso de reparação do veiculo, esta atingir 70% (setenta por cento) do seu valor comercial, considerar-se-á como tendo
         oconido perda total do mesmo, tornando-se como seu valor aquele estabelecido pela Revista Quatro Rodas ou a média
-        encontrada pelos jornais especializados em veículos ou avaliação da Concessionária da marca.<br><br>       
+        encontrada pelos jornais especializados em veículos ou avaliação da Concessionária da marca.<br><br>
         4.4. A não devolução do veiculo na data determinada no Demonstrativo do Contrato de Aluguel de Veículos (ANEXO 1) sem
         expressa autorização da locadora, igualmente configurará perda da proteção LOCADORA, para efeitos de indenização civil por
         danos a terceiros ou ao veiculo alugado, perdurando essa responsabilidade até a efetiva devolução.<br><br>
@@ -427,7 +425,7 @@
         efeitos legais.</p>
 </div><br><br>
 
-        <div style="text-align: center; font-size: 12">Lajedo, {{ $dataAtual->formatLocalized('%d de %B de %Y') }}<br><br><br><br>
+        <div style="text-align: center; font-size: 12">Lajedo, {{ $dataAtual->isoFormat('DD MMMM YYYY') }}<br><br><br><br>
 
             ___________________________________________________________<br>
             LOCATÁRIO: {{$locacao->Cliente->nome}}<br><Br><br><br>
@@ -435,8 +433,8 @@
             ___________________________________________________________<br>
             LOCADOR: LOCADORA DE VEICULOS LUCENA- EIRELI-ME
 
-        
-        
+
+
         </div>
 
 </body>
