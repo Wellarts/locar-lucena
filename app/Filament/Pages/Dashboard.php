@@ -108,7 +108,8 @@ class Dashboard extends \Filament\Pages\Dashboard
 
         foreach ($veiculos as $veiculo) {
             if ($veiculo->status_alerta == 1 and $veiculo->status == 1) {
-                if ($veiculo->km_atual >= $veiculo->aviso_troca_oleo) {
+                  //  dd(($veiculo->prox_troca_oleo - $veiculo->km_atual));
+                if (($veiculo->prox_troca_oleo - $veiculo->km_atual) <= $veiculo->aviso_troca_oleo) {
                     Notification::make()
                         ->title('ATENÇÃO: Veículos com troca de óleo próxima')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
@@ -117,7 +118,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->send();
                 }
 
-                if ($veiculo->km_atual >= $veiculo->aviso_troca_filtro) {
+                if (($veiculo->prox_troca_filtro - $veiculo->km_atual) <= $veiculo->aviso_troca_filtro) {
                     Notification::make()
                         ->title('ATENÇÃO: Veículos com troca do filtro próxima')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
@@ -126,7 +127,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->send();
                 }
 
-                if ($veiculo->km_atual >= $veiculo->aviso_troca_correia) {
+                if (($veiculo->prox_troca_correia - $veiculo->km_atual) <= $veiculo->aviso_troca_correia) {
                     Notification::make()
                         ->title('ATENÇÃO: Veículos com troca da correia próxima')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
@@ -135,7 +136,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->send();
                 }
 
-                if ($veiculo->km_atual >= $veiculo->aviso_troca_pastilha) {
+                if (($veiculo->prox_troca_pastilha - $veiculo->km_atual) <= $veiculo->aviso_troca_pastilha) {
                     Notification::make()
                         ->title('ATENÇÃO: Veículos com troca da pastilha próxima')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)

@@ -30,6 +30,7 @@ class Veiculo extends Model
         'chassi',
         'data_compra',
         'status',
+        'status_alerta',
         'status_locado'
     ];
 
