@@ -60,12 +60,11 @@ class LocacaoResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('cliente_id')
                                     ->label('Cliente')
-                                    ->native(false)
                                     ->columnSpan([
                                         'xl' => 2,
                                         '2xl' => 2,
                                     ])
-                                    ->reactive()
+                                    ->live()
                                     ->required(false)
                                     ->options(Cliente::all()->pluck('nome', 'id')->toArray())
                                     ->afterStateUpdated(function ($state, callable $set, Get $get) {
@@ -283,27 +282,27 @@ class LocacaoResource extends Resource
                                     '2xl' => 3,
                                 ])
                                     ->schema([
-                                        Select::make('tipo')
-                                            ->options([
-                                                'multa' => 'Multa',
-                                                'colisao' => 'Colisão',
-                                                'avaria' => 'Avaria',
-                                                'danos_terceiros' => 'Danos a Terceiros',
-                                                'outro' => 'Outros',
-                                            ]),
-                                          
-                                        DateTimePicker::make('data_hora'),
-                                        TextInput::make('valor'),
-                                        Textarea::make('descricao')
-                                            ->columnSpan(2)
-                                            ->autosize()
-                                            ->label('Descrição'),
-
-                                        ToggleButtons::make('status')
-                                            ->label('Concluído?')
-                                            ->default(false)
-                                            ->boolean()
-                                            ->grouped()
+                                Select::make('tipo')
+                                    ->options([
+                                        'multa' => 'Multa',
+                                        'colisao' => 'Colisão',
+                                        'avaria' => 'Avaria',
+                                        'danos_terceiros' => 'Danos a Terceiros',
+                                        'outro' => 'Outros',
+                                    ])
+                                    ->required(),
+                                DateTimePicker::make('data_hora'),
+                                TextInput::make('valor'),
+                                Textarea::make('descricao')
+                                    ->columnSpan(2)
+                                    ->autosize()
+                                    ->label('Descrição'),
+                                
+                                ToggleButtons::make('status')
+                                    ->label('Concluído?')
+                                    ->default(false)
+                                    ->boolean()
+                                    ->grouped()
 
 
                                     ])
