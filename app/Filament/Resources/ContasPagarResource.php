@@ -128,6 +128,7 @@ class ContasPagarResource extends Resource
                         ->alignCenter()
                         ->label('Parcela Nº'),
                     Tables\Columns\TextColumn::make('data_vencimento')
+                        ->date('d/m/Y')
                         ->badge()
                         ->sortable()
                         ->alignCenter()
@@ -163,6 +164,7 @@ class ContasPagarResource extends Resource
                         ->color('warning')
                         ->money('BRL'),
                     Tables\Columns\TextColumn::make('data_pagamento')
+                        ->date('d/m/Y')
                         ->alignCenter()
                         ->badge()
                         ->color('warning')

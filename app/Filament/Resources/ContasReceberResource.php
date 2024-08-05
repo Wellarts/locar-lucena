@@ -134,6 +134,7 @@ class ContasReceberResource extends Resource
                 ->alignCenter()
                 ->label('Parcela Nº'),
             Tables\Columns\TextColumn::make('data_vencimento')
+                ->date('d/m/Y')
                 ->sortable()
                 ->alignCenter()
                 ->badge()
@@ -173,6 +174,7 @@ class ContasReceberResource extends Resource
                 ->color('warning')
                 ->money('BRL'),
             Tables\Columns\TextColumn::make('data_recebimento')
+                ->date('d/m/Y')
                 ->alignCenter()
                 ->badge()
                 ->color('warning')
