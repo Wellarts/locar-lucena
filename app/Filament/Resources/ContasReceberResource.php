@@ -138,8 +138,7 @@ class ContasReceberResource extends Resource
                 ->sortable()
                 ->alignCenter()
                 ->badge()
-                ->color('danger')
-                ->date(),
+                ->color('danger'),
             Tables\Columns\TextColumn::make('valor_total')
                 ->alignCenter()
                 ->badge()
@@ -177,9 +176,8 @@ class ContasReceberResource extends Resource
                 ->date('d/m/Y')
                 ->alignCenter()
                 ->badge()
-                ->color('warning')
-                ->date(),
-                Tables\Columns\TextColumn::make('created_at')
+                ->color('warning'),
+            Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -80,7 +80,7 @@ class CustoVeiculoResource extends Resource
                 ->label('Km Atual'),
             Tables\Columns\TextColumn::make('data')
                 ->sortable()
-                ->date(),
+                ->date('d/m/Y'),
             Tables\Columns\TextColumn::make('valor')
                 ->summarize(Sum::make()->money('BRL')->label('Total'))
                 ->money('BRL')
