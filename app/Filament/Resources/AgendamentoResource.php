@@ -212,7 +212,7 @@ class AgendamentoResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filter::make('Locados')
+                Filter::make('Agendados')
                     ->query(fn (Builder $query): Builder => $query->where('status', false))
                     ->default(1),
                 SelectFilter::make('cliente')->searchable()->relationship('cliente', 'nome'),
