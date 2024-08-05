@@ -28,7 +28,7 @@
 
     #ficha td {
     border: 1px solid rgb(160 160 160);
-    padding: 8px 10px;
+    padding: 0px 0px;
     }
 
 

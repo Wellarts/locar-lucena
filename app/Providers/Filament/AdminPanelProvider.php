@@ -6,6 +6,7 @@ use App\Filament\Widgets\ContasPagarHoje;
 use App\Filament\Widgets\ContasReceberHoje;
 use App\Filament\Widgets\LocacaoMes;
 use App\Filament\Widgets\SomatorioLocacao;
+use App\Filament\Widgets\StatsVeiculos;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -51,6 +52,7 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
              //   Widgets\FilamentInfoWidget::class,
                 SomatorioLocacao::class,
+                StatsVeiculos::class,
                 LocacaoMes::class,
                 ContasReceberHoje::class,
                 ContasPagarHoje::class,

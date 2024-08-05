@@ -8,6 +8,7 @@ use App\Models\Cliente;
 use App\Models\ContasReceber;
 use App\Models\FluxoCaixa;
 use App\Models\Locacao;
+use App\Models\Veiculo;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Actions\Action;
@@ -39,12 +40,17 @@ class ManageLocacaos extends ManageRecords
                 ->modalHeading('Criar Locação')
                 ->after(
                     function ($data, $record) {
-                       // dd([$record->id]);
+                        #ALTERA O STATUS DO VEÍCULO PARA LOCADO
+                        $veiculo = Veiculo::find($data['veiculo_id']);
+                        $veiculo->status_locado = 1;
+                        $veiculo->save();
+                        
+                        #CRIA REGISTO NO FINANCEIRO
                         if ($record->status_financeiro == true and $record->status_pago_financeiro == false) {
                             $valor_parcela = ($record->valor_total_financeiro / $record->parcelas_financeiro);
                             $vencimentos = Carbon::create($record->data_vencimento_financeiro);
                             for ($cont = 0; $cont < $data['parcelas_financeiro']; $cont++) {
-                              //  $dataVencimentos = $vencimentos->addDays(7);
+                                //  $dataVencimentos = $vencimentos->addDays(7);
                                 $parcelas = [
                                     'cliente_id' => $data['cliente_id'],
                                     'valor_total' => $data['valor_total_financeiro'],
@@ -54,9 +60,9 @@ class ManageLocacaos extends ManageRecords
                                     'data_vencimento' => $vencimentos,
                                     'valor_recebido' => 0.00,
                                     'status' => 0,
-                                    'obs' => 'Parcela referente a locação nº: '.$record->id.'',
+                                    'obs' => 'Parcela referente a locação nº: ' . $record->id . '',
                                     'valor_parcela' => $valor_parcela,
-                                   
+
                                 ];
                                 ContasReceber::create($parcelas);
                                 $vencimentos = $vencimentos->addDays(7);
@@ -73,7 +79,7 @@ class ManageLocacaos extends ManageRecords
                                 'data_recebimento' => $data['data_vencimento_financeiro'],
                                 'valor_recebido' => $data['valor_total_financeiro'],
                                 'status' => 1,
-                                'obs' => 'Recebimento referente da locação nº: '.$record->id.'',
+                                'obs' => 'Recebimento referente da locação nº: ' . $record->id . '',
                                 'valor_parcela' => $data['valor_total_financeiro'],
                             ];
                             ContasReceber::create($parcelas);
@@ -81,7 +87,7 @@ class ManageLocacaos extends ManageRecords
                             $addFluxoCaixa = [
                                 'valor' => $data['valor_total_financeiro'],
                                 'tipo'  => 'CREDITO',
-                                'obs'   => 'Recebimento referente da locação nº: '.$record->id.'',
+                                'obs'   => 'Recebimento referente da locação nº: ' . $record->id . '',
                             ];
 
                             FluxoCaixa::create($addFluxoCaixa);
