@@ -338,7 +338,7 @@ class LocacaoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('status', '0')
+            ->defaultSort('id', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->sortable()
