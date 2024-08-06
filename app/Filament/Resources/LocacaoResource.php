@@ -27,6 +27,7 @@ use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -387,6 +388,7 @@ class LocacaoResource extends Resource
                     ->money('BRL')
                     ->label('Valor Total'),
                 Tables\Columns\TextColumn::make('status')
+                    ->summarize(Count::make())
                     ->Label('Status')
                     ->badge()
                     ->alignCenter()
