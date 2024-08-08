@@ -87,9 +87,17 @@ class LocacaoResource extends Resource
                                     ->required(false)
                                     ->label('Veículo')
                                     ->live(onBlur: true)
-                                    ->relationship(
+                                    ->relationship( 
                                         name: 'veiculo',
-                                        modifyQueryUsing: fn (Builder $query) => $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa'),
+                                       // modifyQueryUsing: fn (Builder $query) =>  $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa'),
+                                       modifyQueryUsing: function(Builder $query, $context) {
+                                            if($context === 'create') {
+                                                $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa');
+                                            } else {
+                                                $query->where('status', 1)->orderBy('modelo')->orderBy('placa');
+                                            }
+                                       }
+                                       
                                     )
                                     ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->modelo} {$record->placa}")
                                     ->searchable(['modelo', 'placa'])
