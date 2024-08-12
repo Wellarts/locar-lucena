@@ -6,6 +6,7 @@ use App\Filament\Resources\LocacaoResource\Pages;
 use App\Filament\Resources\LocacaoResource\RelationManagers;
 use App\Filament\Resources\LocacaoResource\RelationManagers\OcorrenciaRelationManager;
 use App\Models\Cliente;
+use App\Models\Estado;
 use App\Models\Locacao;
 use App\Models\Veiculo;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -26,6 +28,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
@@ -37,6 +40,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Laravel\SerializableClosure\Serializers\Native;
 use Leandrocfe\FilamentPtbrFormFields\Money;
+use Illuminate\Support\Str;
 
 class LocacaoResource extends Resource
 {
@@ -71,7 +75,109 @@ class LocacaoResource extends Resource
                                     ])
                                     ->live()
                                     ->required(false)
-                                    ->options(Cliente::all()->pluck('nome', 'id')->toArray())
+                                    // ->options(Cliente::all()->pluck('nome', 'id')->toArray())
+                                    ->relationship('cliente', 'nome')
+                                    ->createOptionForm([
+                                        Grid::make([
+                                            'xl' => 3,
+                                            '2xl' => 3,
+                                        ])
+                                            ->schema([
+                                                Forms\Components\TextInput::make('nome')
+                                                    ->label('Nome')
+                                                    ->columnSpan([
+                                                        'xl' => 2,
+                                                        '2xl' => 2,
+                                                    ])
+                                                    ->maxLength(255),
+                                                Forms\Components\TextInput::make('cpf_cnpj')
+                                                    ->label('CPF/CNPJ')
+                                                    ->mask(RawJs::make(<<<'JS'
+                                                            $input.length > 14 ? '99.999.999/9999-99' : '999.999.999-99'
+                                                        JS))
+                                                    ->rule('cpf_ou_cnpj'),
+                                                Forms\Components\Textarea::make('endereco')
+                                                    ->label('Endereço')
+                                                    ->columnSpanFull(),
+                                                Forms\Components\Select::make('estado_id')
+                                                    ->label('Estado')
+                                                    ->native(false)
+                                                    ->searchable()
+                                                    ->required()
+                                                    ->default(16)
+                                                    ->options(Estado::all()->pluck('nome', 'id')->toArray())
+                                                    ->live(),
+                                                Forms\Components\Select::make('cidade_id')
+                                                    ->label('Cidade')
+                                                    ->default(5256)
+                                                    ->native(false)
+                                                    ->searchable()
+                                                    ->required()
+                                                    ->options(function (callable $get) {
+                                                        $estado = Estado::find($get('estado_id'));
+                                                        if (!$estado) {
+                                                            return Estado::all()->pluck('nome', 'id');
+                                                        }
+                                                        return $estado->cidade->pluck('nome', 'id');
+                                                    })
+                                                    ->reactive(),
+                                                Forms\Components\TextInput::make('telefone_1')
+                                                    ->label('Telefone 1')
+                                                    ->tel()
+                                                    ->mask('(99)99999-9999'),
+                                                Forms\Components\TextInput::make('telefone_2')
+                                                    ->tel()
+                                                    ->label('Telefone 2')
+                                                    ->tel()
+                                                    ->mask('(99)99999-9999'),
+                                                Forms\Components\TextInput::make('email')
+                                                    ->columnSpan([
+                                                        'xl' => 2,
+                                                        '2xl' => 2,
+                                                    ])
+                                                    ->email()
+                                                    ->maxLength(255),
+                                                Forms\Components\TextInput::make('rede_social')
+                                                    ->label('Rede Social'),
+                                                Forms\Components\TextInput::make('cnh')
+                                                    ->label('CNH'),
+                                                Forms\Components\TextInput::make('validade_cnh')
+                                                    ->mask('99/99/9999')
+                                                    ->maxLength(10)
+                                                    ->label('Valiade da CNH'),
+                                                Forms\Components\TextInput::make('rg')
+                                                    ->label('RG'),
+                                                Forms\Components\TextInput::make('exp_rg')
+                                                    ->label('Orgão Exp.'),
+                                                Forms\Components\Select::make('estado_exp_rg')
+                                                    ->searchable()
+                                                    ->label('UF - Expedidor')
+                                                    ->options(Estado::all()->pluck('nome', 'id')->toArray()),
+                                                FileUpload::make('img_cnh')
+                                                    ->columnSpan([
+                                                        'xl' => 2,
+                                                        '2xl' => 2,
+                                                    ])
+                                                    ->downloadable()
+                                                    ->label('Foto CNH'),
+
+                                                Forms\Components\TextInput::make('data_nascimento')
+                                                    ->mask('99/99/9999')
+                                                    ->label('Data de Nascimento')
+                                                    ->formatStateUsing(function ($state, $context) {
+                                                        if ($context == 'edit') {
+                                                            return  Carbon::parse($state)->format('d/m/Y');
+                                                        }
+                                                    })
+                                                    ->dehydrateStateUsing(function ($state) {
+                                                        $dt = Str::replace('/', '-', $state);
+                                                        return Carbon::parse($dt)->format('Y-m-d');
+                                                    }),
+
+
+
+                                            ])
+                                    ])
                                     ->afterStateUpdated(function ($state) {
                                         if ($state != null) {
                                             $cliente = Cliente::find($state);
@@ -83,23 +189,24 @@ class LocacaoResource extends Resource
                                                 ->send();
                                         }
                                     }),
+
                                 Forms\Components\Select::make('veiculo_id')
                                     ->required(false)
                                     ->label('Veículo')
                                     ->live(onBlur: true)
-                                    ->relationship( 
+                                    ->relationship(
                                         name: 'veiculo',
-                                       // modifyQueryUsing: fn (Builder $query) =>  $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa'),
-                                       modifyQueryUsing: function(Builder $query, $context) {
-                                            if($context === 'create') {
+                                        // modifyQueryUsing: fn (Builder $query) =>  $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa'),
+                                        modifyQueryUsing: function (Builder $query, $context) {
+                                            if ($context === 'create') {
                                                 $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa');
                                             } else {
                                                 $query->where('status', 1)->orderBy('modelo')->orderBy('placa');
                                             }
-                                       }
-                                       
+                                        }
+
                                     )
-                                    ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->modelo} {$record->placa}")
+                                    ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->modelo} {$record->placa}")
                                     ->searchable(['modelo', 'placa'])
                                     ->afterStateUpdated(function (Set $set, $state) {
                                         $veiculo = Veiculo::find($state);
@@ -195,7 +302,7 @@ class LocacaoResource extends Resource
                                             ->schema([
                                                 Forms\Components\Toggle::make('status_financeiro')
                                                     ->live()
-                                                    ->disabled(fn (string $context): bool => $context === 'edit')
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->afterStateUpdated(
                                                         function (Get $get, Set $set, $state) {
                                                             if ($state == true) {
@@ -214,8 +321,8 @@ class LocacaoResource extends Resource
                                                     ])
                                                     ->label('Desejar lançar no financeiro?'),
                                                 Forms\Components\Toggle::make('status_pago_financeiro')
-                                                    ->hidden(fn (Get $get): bool => !$get('status_financeiro'))
-                                                    ->disabled(fn (string $context): bool => $context === 'edit')
+                                                    ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->live()
                                                     ->afterStateUpdated(
                                                         function (Get $get, Set $set, $state) {
@@ -233,8 +340,8 @@ class LocacaoResource extends Resource
                                                     )
                                                     ->label('Recebido'),
                                                 Forms\Components\TextInput::make('parcelas_financeiro')
-                                                    ->hidden(fn (Get $get): bool => !$get('status_financeiro'))
-                                                    ->disabled(fn (string $context): bool => $context === 'edit')
+                                                    ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->live(onBlur: true)
                                                     ->afterStateUpdated(
                                                         function (Get $get, Set $set) {
@@ -243,13 +350,13 @@ class LocacaoResource extends Resource
                                                     )
                                                     ->numeric()
                                                     ->label('Qtd Parcelas')
-                                                    ->required(fn (Get $get): bool => $get('status_financeiro')),
+                                                    ->required(fn(Get $get): bool => $get('status_financeiro')),
                                                 Forms\Components\Select::make('formaPgmto_financeiro')
-                                                    ->hidden(fn (Get $get): bool => !$get('status_financeiro'))
-                                                    ->disabled(fn (string $context): bool => $context === 'edit')
+                                                    ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->default(4)
                                                     ->label('Forma de Pagamento')
-                                                    ->required(fn (Get $get): bool => $get('status_financeiro'))
+                                                    ->required(fn(Get $get): bool => $get('status_financeiro'))
                                                     ->options([
                                                         1 => 'Dinheiro',
                                                         2 => 'Pix',
@@ -257,23 +364,23 @@ class LocacaoResource extends Resource
                                                         4 => 'Boleto',
                                                     ]),
                                                 Forms\Components\DatePicker::make('data_vencimento_financeiro')
-                                                    ->hidden(fn (Get $get): bool => !$get('status_financeiro'))
-                                                    ->disabled(fn (string $context): bool => $context === 'edit')
-                                                    ->required(fn (Get $get): bool => $get('status_financeiro'))
+                                                    ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
+                                                    ->required(fn(Get $get): bool => $get('status_financeiro'))
                                                     ->displayFormat('d/m/Y')
                                                     ->default(Carbon::now())
                                                     ->label("Vencimento da 1º"),
 
                                                 Forms\Components\TextInput::make('valor_parcela_financeiro')
-                                                    ->hidden(fn (Get $get): bool => !$get('status_financeiro'))
-                                                    ->disabled(fn (string $context): bool => $context === 'edit')
+                                                    ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->numeric()
                                                     ->label('Valor da Parcela')
                                                     ->readOnly()
                                                     ->required(false),
                                                 Forms\Components\TextInput::make('valor_total_financeiro')
-                                                    ->hidden(fn (Get $get): bool => !$get('status_financeiro'))
-                                                    ->disabled(fn (string $context): bool => $context === 'edit')
+                                                    ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->default(function (Get $get) {
                                                         return 200;
                                                     })
@@ -400,7 +507,7 @@ class LocacaoResource extends Resource
                     ->Label('Status')
                     ->badge()
                     ->alignCenter()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         '0' => 'danger',
                         '1' => 'success',
                     })
@@ -423,7 +530,7 @@ class LocacaoResource extends Resource
             ])
             ->filters([
                 Filter::make('Locados')
-                    ->query(fn (Builder $query): Builder => $query->where('status', false))
+                    ->query(fn(Builder $query): Builder => $query->where('status', false))
                     ->default(1),
                 SelectFilter::make('cliente')->searchable()->relationship('cliente', 'nome'),
                 SelectFilter::make('veiculo')->searchable()->relationship('veiculo', 'placa'),
@@ -438,18 +545,18 @@ class LocacaoResource extends Resource
                         return $query
                             ->when(
                                 $data['data_saida_de'],
-                                fn ($query) => $query->whereDate('data_saida', '>=', $data['data_saida_de'])
+                                fn($query) => $query->whereDate('data_saida', '>=', $data['data_saida_de'])
                             )
                             ->when(
                                 $data['data_saida_ate'],
-                                fn ($query) => $query->whereDate('data_saida', '<=', $data['data_saida_ate'])
+                                fn($query) => $query->whereDate('data_saida', '<=', $data['data_saida_ate'])
                             );
                     })
 
             ])
             ->actions([
                 Tables\Actions\Action::make('Imprimir')
-                    ->url(fn (Locacao $record): string => route('imprimirLocacao', $record))
+                    ->url(fn(Locacao $record): string => route('imprimirLocacao', $record))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make()
                     ->modalHeading('Editar locação')
