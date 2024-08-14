@@ -178,7 +178,7 @@ class LocacaoResource extends Resource
 
                                             ])
                                     ])
-                                    ->afterStateUpdated(function ($state) {
+                                 /*   ->afterStateUpdated(function ($state) {
                                         if ($state != null) {
                                             $cliente = Cliente::find($state);
                                             Notification::make()
@@ -188,7 +188,7 @@ class LocacaoResource extends Resource
                                                 ->persistent()
                                                 ->send();
                                         }
-                                    }),
+                                    }), */
 
                                 Forms\Components\Select::make('veiculo_id')
                                     ->required(false)
