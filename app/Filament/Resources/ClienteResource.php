@@ -109,7 +109,8 @@ class ClienteResource extends Resource
                         ->downloadable()
                         ->label('Foto CNH'),
 
-                Forms\Components\DatePicker::make('data_nascimento'),
+                        Forms\Components\DatePicker::make('data_nascimento')
+                        ->label('Data de Nascimento'),
                 ])
             ]);
     }

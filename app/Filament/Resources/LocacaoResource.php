@@ -141,10 +141,9 @@ class LocacaoResource extends Resource
                                                     ->label('Rede Social'),
                                                 Forms\Components\TextInput::make('cnh')
                                                     ->label('CNH'),
-                                                Forms\Components\TextInput::make('validade_cnh')
-                                                    ->mask('99/99/9999')
-                                                    ->maxLength(10)
-                                                    ->label('Valiade da CNH'),
+                                                Forms\Components\DatePicker::make('validade_cnh')
+                                                    //   ->format('d/m/Y')
+                                                       ->label('Valiade da CNH'),
                                                 Forms\Components\TextInput::make('rg')
                                                     ->label('RG'),
                                                 Forms\Components\TextInput::make('exp_rg')
@@ -161,18 +160,8 @@ class LocacaoResource extends Resource
                                                     ->downloadable()
                                                     ->label('Foto CNH'),
 
-                                                Forms\Components\TextInput::make('data_nascimento')
-                                                    ->mask('99/99/9999')
-                                                    ->label('Data de Nascimento')
-                                                    ->formatStateUsing(function ($state, $context) {
-                                                        if ($context == 'edit') {
-                                                            return  Carbon::parse($state)->format('d/m/Y');
-                                                        }
-                                                    })
-                                                    ->dehydrateStateUsing(function ($state) {
-                                                        $dt = Str::replace('/', '-', $state);
-                                                        return Carbon::parse($dt)->format('Y-m-d');
-                                                    }),
+                                                    Forms\Components\DatePicker::make('data_nascimento')
+                                                        ->label('Data de Nascimento'),
 
 
 
