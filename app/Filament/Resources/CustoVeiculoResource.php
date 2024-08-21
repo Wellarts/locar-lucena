@@ -40,6 +40,8 @@ class CustoVeiculoResource extends Resource
                         ->required()
                         ->options(Fornecedor::all()->pluck('nome', 'id')->toArray()),
                     Forms\Components\Select::make('veiculo_id')
+                        ->required()
+                        ->label('Veículo')
                         ->relationship(
                             name: 'veiculo',
                             modifyQueryUsing: fn (Builder $query) => $query->orderBy('modelo')->orderBy('placa'),
@@ -49,7 +51,7 @@ class CustoVeiculoResource extends Resource
 
                 Forms\Components\TextInput::make('km_atual')
                     ->label('Km Atual')
-                    ->required(),
+                    ->required(false),
                 Forms\Components\DatePicker::make('data')
                     ->default(now())
                     ->required(),
@@ -57,7 +59,7 @@ class CustoVeiculoResource extends Resource
                     ->label('Descrição do Serviço/Peça')
                     ->autosize()
                     ->columnSpanFull()
-                    ->required(),
+                    ->required(false),
                 Forms\Components\TextInput::make('valor')
                     ->label('Valor Total')
                     ->numeric()
