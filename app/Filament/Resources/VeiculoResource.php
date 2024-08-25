@@ -32,44 +32,41 @@ class VeiculoResource extends Resource
         return $form
             ->schema([
 
-                        Fieldset::make('Veículo')
-                            ->schema([
-                                Grid::make([
-                                    'xl' => 3,
-                                    '2xl' => 3,
-                                ])->schema([
-                                Forms\Components\TextInput::make('modelo'),
-                                Forms\Components\Select::make('marca_id')
-                                    ->label('Marca')
-                                    ->required()
-                                    ->options(Marca::all()->pluck('nome', 'id')->toArray()),
-                                Forms\Components\TextInput::make('ano')
-                                    ->numeric(),
-                                Forms\Components\TextInput::make('placa')
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('cor')
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('km_atual')
-                                    ->label('Km Atual')
-                                    ->numeric(),
-                                Forms\Components\DatePicker::make('data_compra'),
-                                Forms\Components\TextInput::make('chassi')
+                Fieldset::make('Veículo')
+                    ->schema([
+                        Grid::make([
+                            'xl' => 3,
+                            '2xl' => 3,
+                        ])->schema([
+                            Forms\Components\TextInput::make('modelo'),
+                            Forms\Components\Select::make('marca_id')
+                                ->label('Marca')
+                                ->required()
+                                ->options(Marca::all()->pluck('nome', 'id')->toArray()),
+                            Forms\Components\TextInput::make('ano')
+                                ->numeric(),
+                            Forms\Components\TextInput::make('placa')
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('cor')
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('km_atual')
+                                ->label('Km Atual')
+                                ->numeric(),
+                            Forms\Components\DatePicker::make('data_compra'),
+                            Forms\Components\TextInput::make('chassi')
                                 ->label('Nº do Chassi'),
-                                Forms\Components\TextInput::make('valor_diaria')
-                                    ->live(onBlur: true)
-                                    ->label('Valor Diária')
-                                    ->numeric(),
-                            ]),
+                            Forms\Components\TextInput::make('valor_diaria')
+                                ->live(onBlur: true)
+                                ->label('Valor Diária')
+                                ->numeric(),
+                        ]),
                         Fieldset::make('Manutenção')
                             ->schema([
                                 Grid::make([
                                     'xl' => 2,
                                     '2xl' => 2,
                                 ])->schema([
-                                    Forms\Components\Toggle::make('status_alerta')
-                                        ->columnSpanFull()
-                                        ->default(false)
-                                        ->label('Ativar/Desativar - Alertas'),
+
                                     Forms\Components\TextInput::make('prox_troca_oleo')
                                         ->label('Próxima Troca de Óleo - Km'),
                                     Forms\Components\TextInput::make('aviso_troca_oleo')
@@ -86,19 +83,53 @@ class VeiculoResource extends Resource
                                         ->label('Próxima Troca da Pastilha - Km'),
                                     Forms\Components\TextInput::make('aviso_troca_pastilha')
                                         ->label('Aviso Troca da Pastilha - Km'),
+                                    Forms\Components\ToggleButtons::make('status_alerta')
+                                        ->columnSpanFull()
+                                        ->default(0)
+                                        ->options([
+                                            '1' => 'Ativado',
+                                            '0' => 'Desativado',
+
+                                        ])
+                                        ->colors([
+                                            '1' => 'success',
+                                            '0' => 'danger',
+                                        ])
+                                        ->inline()
+                                        ->default(0)
+                                        ->label('Alertas de Manutenção'),
 
 
 
                                 ]),
 
-                                    ]),
-                                    Forms\Components\Toggle::make('status')
-                                    ->default(true)
-                                    ->label('Ativar/Desativar - Veículo')
-                                    ->columnSpan([
-                                        'xl' => 2,
-                                        '2xl' => 2,
                             ]),
+                        Forms\Components\ToggleButtons::make('status')
+                            ->options([
+                                '1' => 'Ativado',
+                                '0' => 'Desativado',
+
+                            ])
+                            ->colors([
+                                '1' => 'success',
+                                '0' => 'danger',
+                            ])
+                            ->inline()
+                            ->default(0)
+                            ->label('Status do Veículo'),
+                        Forms\Components\ToggleButtons::make('status_locado')
+                            ->options([
+                                '0' => 'Disponível',
+                                '1' => 'Locado',
+
+                            ])
+                            ->colors([
+                                '0' => 'success',
+                                '1' => 'danger',
+                            ])
+                            ->inline()
+                            ->default(0)
+                            ->label('Locação'),
                     ])
             ]);
     }
@@ -125,6 +156,10 @@ class VeiculoResource extends Resource
                 Tables\Columns\IconColumn::make('status')
                     ->sortable()
                     ->boolean(),
+                Tables\Columns\IconColumn::make('status_locado')
+                    ->label('Status de Locação')
+                    ->sortable()
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -136,9 +171,13 @@ class VeiculoResource extends Resource
             ])
             ->filters([
                 Filter::make('Ativos')
-                ->query(fn (Builder $query): Builder => $query->where('status',true)),
+                    ->query(fn(Builder $query): Builder => $query->where('status', true)),
                 Filter::make('Inativos')
-                ->query(fn (Builder $query): Builder => $query->where('status',false)),
+                    ->query(fn(Builder $query): Builder => $query->where('status', false)),
+                Filter::make('Locados')
+                    ->query(fn(Builder $query): Builder => $query->where('status_locado', 1)),
+                Filter::make('Disponíveis')
+                    ->query(fn(Builder $query): Builder => $query->where('status_locado', 0)),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
