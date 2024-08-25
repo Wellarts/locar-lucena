@@ -313,7 +313,7 @@
         <b>LOCATÁRIO:</b><br>
         <b>Nome:</b>  {{$locacao->Cliente->nome}}<br>
         <b>Endereço:</b> {{$locacao->Cliente->endereco}}<br>
-        <b>Cidade:</b> {{$locacao->Cliente->Cidade->nome}}<br>
+        <b>Cidade:</b> {{$locacao->Cliente->Cidade->nome}} - {{$locacao->Cliente->Estado->nome}}<br>
         <b>CPF/CNPJ:</b> {{$cpfCnpj}} <b>RG:</b> {{$locacao->Cliente->rg}} <b>EXP:</b> {{$locacao->Cliente->exp_rg}}<br><br>
         As partes acima têm entre si justo e contratado a locação de veículo, descrito no ANEXO 1 do presente contrato, nos seguintes
         temos e condições:<br>
