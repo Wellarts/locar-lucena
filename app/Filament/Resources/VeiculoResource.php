@@ -157,6 +157,7 @@ class VeiculoResource extends Resource
                     ->sortable()
                     ->boolean(),
                 Tables\Columns\IconColumn::make('status_locado')
+                    ->alignCenter()
                     ->label('Status de Locação')
                     ->sortable()
                     ->boolean(),
