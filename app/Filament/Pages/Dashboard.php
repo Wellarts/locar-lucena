@@ -109,39 +109,40 @@ class Dashboard extends \Filament\Pages\Dashboard
         foreach ($veiculos as $veiculo) {
             if ($veiculo->status_alerta == 1 and $veiculo->status == 1) {
                   //  dd(($veiculo->prox_troca_oleo - $veiculo->km_atual));
+                  
                 if (($veiculo->prox_troca_oleo - $veiculo->km_atual) <= $veiculo->aviso_troca_oleo) {
                     Notification::make()
-                        ->title('ATENÇÃO: Veículos com troca de óleo próxima')
+                        ->title('ATENÇÃO: Veículos com troca de óleo próxima. Faltam '.$veiculo->prox_troca_oleo - $veiculo->km_atual.' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
 
                 if (($veiculo->prox_troca_filtro - $veiculo->km_atual) <= $veiculo->aviso_troca_filtro) {
                     Notification::make()
-                        ->title('ATENÇÃO: Veículos com troca do filtro próxima')
+                        ->title('ATENÇÃO: Veículos com troca do filtro próxima.  Faltam '.$veiculo->prox_troca_filtro - $veiculo->km_atual.' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
 
                 if (($veiculo->prox_troca_correia - $veiculo->km_atual) <= $veiculo->aviso_troca_correia) {
                     Notification::make()
-                        ->title('ATENÇÃO: Veículos com troca da correia próxima')
+                        ->title('ATENÇÃO: Veículos com troca da correia próxima.  Faltam '.$veiculo->prox_troca_correia - $veiculo->km_atual.' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
 
                 if (($veiculo->prox_troca_pastilha - $veiculo->km_atual) <= $veiculo->aviso_troca_pastilha) {
                     Notification::make()
-                        ->title('ATENÇÃO: Veículos com troca da pastilha próxima')
+                        ->title('ATENÇÃO: Veículos com troca da pastilha próxima.  Faltam '.$veiculo->prox_troca_pastilha - $veiculo->km_atual.' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
             }

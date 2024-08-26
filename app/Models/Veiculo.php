@@ -31,7 +31,8 @@ class Veiculo extends Model
         'data_compra',
         'status',
         'status_alerta',
-        'status_locado'
+        'status_locado',
+        'obs',
     ];
 
     public function Marca()

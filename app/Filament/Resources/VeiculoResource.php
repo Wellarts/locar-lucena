@@ -59,6 +59,11 @@ class VeiculoResource extends Resource
                                 ->live(onBlur: true)
                                 ->label('Valor Diária')
                                 ->numeric(),
+                            Forms\Components\Textarea::make('obs')
+                                ->autosize()
+                                ->columnSpanFull()
+                                ->label('Observações'),
+                               
                         ]),
                         Fieldset::make('Manutenção')
                             ->schema([
