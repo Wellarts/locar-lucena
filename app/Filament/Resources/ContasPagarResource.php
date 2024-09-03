@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\ContasPagarExporter;
 use App\Filament\Resources\ContasPagarResource\Pages;
 use App\Filament\Resources\ContasPagarResource\RelationManagers;
 use App\Models\ContasPagar;
 use App\Models\FluxoCaixa;
 use App\Models\Fornecedor;
 use Carbon\Carbon;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -20,6 +22,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\ExportAction;
+
 
 class ContasPagarResource extends Resource
 {
@@ -120,7 +124,17 @@ class ContasPagarResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-               ->columns([
+        ->headerActions([
+            ExportAction::make()
+                ->exporter(ContasPagarExporter::class)
+                ->formats([
+                    ExportFormat::Xlsx,
+                ])
+                ->columnMapping(false)
+                ->label('Exportar Contas')
+                ->modalHeading('Confirmar exportação?')
+                ])
+              ->columns([
                     Tables\Columns\TextColumn::make('fornecedor.nome')
                         ->sortable()
                         ->searchable(),
@@ -217,7 +231,9 @@ class ContasPagarResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    
                 ]),
+                
             ]);
     }
 

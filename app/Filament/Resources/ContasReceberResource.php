@@ -20,6 +20,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\ExportAction;
+use App\Filament\Exports\ContasReceberExporter;
+use Filament\Actions\Exports\Enums\ExportFormat;
 
 class ContasReceberResource extends Resource
 {
@@ -126,6 +129,16 @@ class ContasReceberResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->headerActions([
+            ExportAction::make()
+                ->exporter(ContasReceberExporter::class)
+                ->formats([
+                    ExportFormat::Xlsx,
+                ])
+                ->columnMapping(false)
+                ->label('Exportar Contas')
+                ->modalHeading('Confirmar exportação?')
+                ])
             ->columns([
                 Tables\Columns\TextColumn::make('cliente.nome')
                 ->sortable()
