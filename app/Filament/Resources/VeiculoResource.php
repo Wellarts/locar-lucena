@@ -129,7 +129,7 @@ class VeiculoResource extends Resource
                                 '0' => 'danger',
                             ])
                             ->inline()
-                            ->default(0)
+                            ->default(1)
                             ->label('Status do Veículo'),
                         Forms\Components\ToggleButtons::make('status_locado')
                             ->options([
