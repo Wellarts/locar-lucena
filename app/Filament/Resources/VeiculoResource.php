@@ -8,6 +8,7 @@ use App\Models\Marca;
 use App\Models\Veiculo;
 use Filament\Forms;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -61,8 +62,16 @@ class VeiculoResource extends Resource
                                 ->numeric(),
                             Forms\Components\Textarea::make('obs')
                                 ->autosize()
-                                ->columnSpanFull()
+                                ->columnSpan(2)
                                 ->label('Observações'),
+                            FileUpload::make('documentos')
+                               /* ->columnSpan([
+                                    'xl' => 2,
+                                    '2xl' => 2,
+                                ]) */
+                               ->multiple()
+                            ->downloadable()
+                            ->label('Documentos'),
                                
                         ]),
                         Fieldset::make('Manutenção')

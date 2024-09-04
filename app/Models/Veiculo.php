@@ -33,6 +33,11 @@ class Veiculo extends Model
         'status_alerta',
         'status_locado',
         'obs',
+        'documentos',
+    ];
+
+    protected $casts = [
+        'documentos' => 'array',
     ];
 
     public function Marca()
