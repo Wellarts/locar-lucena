@@ -47,30 +47,33 @@ class ContasReceberResource extends Resource
                 Forms\Components\TextInput::make('valor_total')
                     ->numeric()
                     ->required(),
+                Forms\Components\Select::make('proxima_parcela')
+                    ->hiddenOn('edit')
+                    ->options([
+                        '7' => 'Semanal',
+                        '15' => 'Quinzenal',
+                        '30' => 'Mensal',
+                    ])
+                    ->default(7)
+                    ->label('Próximas Parcelas'),
                 Forms\Components\TextInput::make('parcelas')
                     ->hiddenOn('edit')
                     ->live(onBlur: true)
                     ->afterStateUpdated(function (Get $get, callable $set) {
-                        if($get('parcelas') != 1)
-                           {
+                        if ($get('parcelas') != 1) {
                             $set('valor_parcela', ((float)($get('valor_total') / $get('parcelas'))));
                             $set('status', 0);
                             $set('valor_recebido', 0);
                             $set('data_recebimento', null);
-                            fn (Set $set) => $set('data_vencimento',  Carbon::now()->addDays(30)->format('Y-m-d'));
-                           }
-                        else
-                            {
+                            $set('data_vencimento',  Carbon::now()->addDays($get('proxima_parcela'))->format('Y-m-d'));
+                        } else {
 
-                                $set('valor_parcela', $get('valor_total'));
-                                $set('status', 1);
-                                $set('valor_recebido', $get('valor_total'));
-                                fn (Set $set) => $set('data_vencimento',  Carbon::now()->format('Y-m-d'));
-                                fn (Set $set) => $set('data_recebimento',  Carbon::now()->format('Y-m-d'));
-
-
-                            }
-
+                            $set('valor_parcela', $get('valor_total'));
+                            $set('status', 1);
+                            $set('valor_recebido', $get('valor_total'));
+                            $set('data_recebimento', Carbon::now()->format('Y-m-d'));
+                            $set('data_vencimento',  Carbon::now()->format('Y-m-d'));
+                        }
                     })
                     ->required(),
                 Forms\Components\Select::make('formaPgmto')
@@ -100,27 +103,24 @@ class ContasReceberResource extends Resource
                     ->label('Recebido')
                     ->required()
                     ->reactive()
-                    ->afterStateUpdated(function (Get $get, callable $set) {
-                                if($get('status') == 1)
-                                    {
-                                        $set('valor_recebido', $get('valor_parcela'));
-                                        $set('data_recebimento',  Carbon::now()->format('Y-m-d'));
+                    ->afterStateUpdated(
+                        function (Get $get, callable $set) {
+                            if ($get('status') == 1) {
+                                $set('valor_recebido', $get('valor_parcela'));
+                                $set('data_recebimento',  Carbon::now()->format('Y-m-d'));
+                            } else {
 
-                                    }
-                                else
-                                    {
-
-                                        $set('valor_recebido', 0);
-                                        $set('data_recebimento', null);
-                                    }
-                                }
+                                $set('valor_recebido', 0);
+                                $set('data_recebimento', null);
+                            }
+                        }
                     ),
 
                 Forms\Components\TextInput::make('valor_parcela')
-                      ->numeric()
-                      ->required(),
+                    ->numeric()
+                    ->required(),
                 Forms\Components\TextInput::make('valor_recebido')
-                       ->numeric(),
+                    ->numeric(),
                 Forms\Components\Textarea::make('obs')
                     ->label('Observações'),
             ]);
@@ -129,68 +129,69 @@ class ContasReceberResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->headerActions([
-            ExportAction::make()
-                ->exporter(ContasReceberExporter::class)
-                ->formats([
-                    ExportFormat::Xlsx,
-                ])
-                ->columnMapping(false)
-                ->label('Exportar Contas')
-                ->modalHeading('Confirmar exportação?')
-                ])
+            ->defaultSort('status', 'asc')
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(ContasReceberExporter::class)
+                    ->formats([
+                        ExportFormat::Xlsx,
+                    ])
+                    ->columnMapping(false)
+                    ->label('Exportar Contas')
+                    ->modalHeading('Confirmar exportação?')
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('cliente.nome')
-                ->sortable()
-                ->searchable(),
-            Tables\Columns\TextColumn::make('ordem_parcela')
-                ->alignCenter()
-                ->label('Parcela Nº'),
-            Tables\Columns\TextColumn::make('data_vencimento')
-                ->date('d/m/Y')
-                ->sortable()
-                ->alignCenter()
-                ->badge()
-                ->color('danger'),
-            Tables\Columns\TextColumn::make('valor_total')
-                ->alignCenter()
-                ->badge()
-                ->color('success')
-                 ->money('BRL'),
-            Tables\Columns\SelectColumn::make('formaPgmto')
-                ->Label('Forma de Pagamento')
-                ->disabled()
-                ->options([
-                    1 => 'Dinheiro',
-                    2 => 'Pix',
-                    3 => 'Cartão',
-                    4 => 'Boleto',
-                ]),
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('ordem_parcela')
+                    ->alignCenter()
+                    ->label('Parcela Nº'),
+                Tables\Columns\TextColumn::make('data_vencimento')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->alignCenter()
+                    ->badge()
+                    ->color('danger'),
+                Tables\Columns\TextColumn::make('valor_total')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('success')
+                    ->money('BRL'),
+                Tables\Columns\SelectColumn::make('formaPgmto')
+                    ->Label('Forma de Pagamento')
+                    ->disabled()
+                    ->options([
+                        1 => 'Dinheiro',
+                        2 => 'Pix',
+                        3 => 'Cartão',
+                        4 => 'Boleto',
+                    ]),
 
 
 
-            Tables\Columns\TextColumn::make('valor_parcela')
-                ->summarize(Sum::make()->money('BRL')->label('Total'))
-                ->alignCenter()
-                ->badge()
-                ->color('danger')
-                ->money('BRL'),
-            Tables\Columns\IconColumn::make('status')
-                ->label('Recebido')
-                ->boolean(),
-            Tables\Columns\TextColumn::make('valor_recebido')
-                ->summarize(Sum::make()->money('BRL')->label('Total'))
-                ->label('Valor Recebido')
-                ->alignCenter()
-                ->badge()
-                ->color('warning')
-                ->money('BRL'),
-            Tables\Columns\TextColumn::make('data_recebimento')
-                ->date('d/m/Y')
-                ->alignCenter()
-                ->badge()
-                ->color('warning'),
-            Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('valor_parcela')
+                    ->summarize(Sum::make()->money('BRL')->label('Total'))
+                    ->alignCenter()
+                    ->badge()
+                    ->color('danger')
+                    ->money('BRL'),
+                Tables\Columns\IconColumn::make('status')
+                    ->label('Recebido')
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('valor_recebido')
+                    ->summarize(Sum::make()->money('BRL')->label('Total'))
+                    ->label('Valor Recebido')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('warning')
+                    ->money('BRL'),
+                Tables\Columns\TextColumn::make('data_recebimento')
+                    ->date('d/m/Y')
+                    ->alignCenter()
+                    ->badge()
+                    ->color('warning'),
+                Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -200,10 +201,12 @@ class ContasReceberResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filter::make('Aberta')
-                ->query(fn (Builder $query): Builder => $query->where('status', false)),
-                 SelectFilter::make('cliente')->relationship('cliente', 'nome'),
-                 Tables\Filters\Filter::make('data_vencimento')
+                Filter::make('A receber')
+                    ->query(fn(Builder $query): Builder => $query->where('status', false)),
+                Filter::make('Recebidas')
+                    ->query(fn(Builder $query): Builder => $query->where('status', true)),
+                SelectFilter::make('cliente')->relationship('cliente', 'nome'),
+                Tables\Filters\Filter::make('data_vencimento')
                     ->form([
                         Forms\Components\DatePicker::make('vencimento_de')
                             ->label('Vencimento de:'),
@@ -212,29 +215,32 @@ class ContasReceberResource extends Resource
                     ])
                     ->query(function ($query, array $data) {
                         return $query
-                            ->when($data['vencimento_de'],
-                                fn($query) => $query->whereDate('data_vencimento', '>=', $data['vencimento_de']))
-                            ->when($data['vencimento_ate'],
-                                fn($query) => $query->whereDate('data_vencimento', '<=', $data['vencimento_ate']));
+                            ->when(
+                                $data['vencimento_de'],
+                                fn($query) => $query->whereDate('data_vencimento', '>=', $data['vencimento_de'])
+                            )
+                            ->when(
+                                $data['vencimento_ate'],
+                                fn($query) => $query->whereDate('data_vencimento', '<=', $data['vencimento_ate'])
+                            );
                     })
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                 ->modalHeading('Editar conta a receber')
-                ->after(function ($data, $record) {
+                    ->modalHeading('Editar conta a receber')
+                    ->after(function ($data, $record) {
 
-                    if($record->status == true)
-                    {
+                        if ($record->status == true) {
 
-                        $addFluxoCaixa = [
-                            'valor' => ($record->valor_parcela),
-                            'tipo'  => 'CREDITO',
-                            'obs'   => 'Recebimento de conta',
-                        ];
+                            $addFluxoCaixa = [
+                                'valor' => ($record->valor_parcela),
+                                'tipo'  => 'CREDITO',
+                                'obs'   => 'Recebimento de conta',
+                            ];
 
-                        FluxoCaixa::create($addFluxoCaixa);
-                    }
-                }),
+                            FluxoCaixa::create($addFluxoCaixa);
+                        }
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

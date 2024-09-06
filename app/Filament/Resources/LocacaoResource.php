@@ -41,6 +41,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Laravel\SerializableClosure\Serializers\Native;
 use Leandrocfe\FilamentPtbrFormFields\Money;
 use Illuminate\Support\Str;
+use Saade\FilamentAutograph\Forms\Components\SignaturePad;
 
 class LocacaoResource extends Resource
 {
@@ -282,6 +283,18 @@ class LocacaoResource extends Resource
                                     ->columnSpanFull()
                                     ->label('Observações'),
 
+
+                                // SignaturePad::make('assinatura_contrato')
+                                //     ->columnSpanFull()
+                                //     ->label('Assinatura do Contrato')
+                                //     ->backgroundColor('#FFFFFF')
+                                //     ->backgroundColorOnDark('#FFFFFF')
+                                //     ->penColor('#1C1C1C')
+                                //     ->penColorOnDark('#1C1C1C'),
+
+
+
+
                                 Fieldset::make('Financeiro')
                                     ->schema([
                                         Grid::make([
@@ -305,8 +318,8 @@ class LocacaoResource extends Resource
                                                         }
                                                     )
                                                     ->columnSpan([
-                                                        'xl' => 2,
-                                                        '2xl' => 2,
+                                                        'xl' => 1,
+                                                        '2xl' => 1,
                                                     ])
                                                     ->label('Desejar lançar no financeiro?'),
                                                 Forms\Components\Toggle::make('status_pago_financeiro')
@@ -318,6 +331,7 @@ class LocacaoResource extends Resource
                                                             if ($state == true) {
                                                                 $set('parcelas_financeiro', 1);
                                                                 $set('valor_parcela_financeiro', ((float)$get('valor_total_desconto')));
+                                                                $set('data_vencimento_financeiro', Carbon::now()->format('Y-m-d'));
                                                             } else {
                                                                 $set('valor_parcela_financeiro', '');
                                                                 $set('parcelas_financeiro', ' ');
@@ -328,6 +342,16 @@ class LocacaoResource extends Resource
 
                                                     )
                                                     ->label('Recebido'),
+                                                Forms\Components\Select::make('proxima_parcela')
+                                                    ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
+                                                    ->disabled(fn(string $context): bool => $context === 'edit')
+                                                    ->options([
+                                                        '7' => 'Semanal',
+                                                        '15' => 'Quinzenal',
+                                                        '30' => 'Mensal',
+                                                    ])
+                                                    ->default(7)
+                                                    ->label('Próximas Parcelas'),
                                                 Forms\Components\TextInput::make('parcelas_financeiro')
                                                     ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
                                                     ->disabled(fn(string $context): bool => $context === 'edit')
@@ -335,6 +359,7 @@ class LocacaoResource extends Resource
                                                     ->afterStateUpdated(
                                                         function (Get $get, Set $set) {
                                                             $set('valor_parcela_financeiro', ((float)($get('valor_total_financeiro') / $get('parcelas_financeiro'))));
+                                                            $set('data_vencimento_financeiro',  Carbon::now()->addDays($get('proxima_parcela'))->format('Y-m-d'));
                                                         }
                                                     )
                                                     ->numeric()
@@ -357,7 +382,8 @@ class LocacaoResource extends Resource
                                                     ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->required(fn(Get $get): bool => $get('status_financeiro'))
                                                     ->displayFormat('d/m/Y')
-                                                    ->default(Carbon::now())
+                                                   // ->default(fn(Get $get) => Carbon::now()->addDays($get('proxima_parcela'))->format('Y-m-d'))
+
                                                     ->label("Vencimento da 1º"),
 
                                                 Forms\Components\TextInput::make('valor_parcela_financeiro')
@@ -453,6 +479,7 @@ class LocacaoResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('ID'),
+                Tables\Columns\ImageColumn::make('assinatura_contrato'),
                 Tables\Columns\TextColumn::make('cliente.nome')
                     ->sortable()
                     ->searchable()

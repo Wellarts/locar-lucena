@@ -48,6 +48,14 @@ class ContasPagarResource extends Resource
                 Forms\Components\TextInput::make('valor_total')
                     ->numeric()
                     ->required(),
+                Forms\Components\Select::make('proxima_parcela')
+                    ->options([
+                        '7' => 'Semanal',
+                        '15' => 'Quinzenal',
+                        '30' => 'Mensal',
+                    ])
+                    ->default(30)
+                    ->label('Próximas Parcelas'),
                 Forms\Components\TextInput::make('parcelas')
                     ->live(onBlur: true)
                     ->afterStateUpdated(function (Get $get, Set $set) {
@@ -57,7 +65,7 @@ class ContasPagarResource extends Resource
                             $set('status', 0);
                             $set('valor_pago', 0);
                             $set('data_pagamento', null);
-                            $set('data_vencimento',  Carbon::now()->addDays(30)->format('Y-m-d'));
+                            $set('data_vencimento',  Carbon::now()->addDays($get('proxima_parcela'))->format('Y-m-d'));
                            }
                         else
                             {
@@ -83,6 +91,7 @@ class ContasPagarResource extends Resource
                 Forms\Components\Hidden::make('ordem_parcela')
                     ->label('Parcela Nº')
                     ->default('1'),
+
                 Forms\Components\DatePicker::make('data_vencimento')
                     ->displayFormat('d/m/Y')
                     ->default(now())
@@ -124,6 +133,7 @@ class ContasPagarResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->defaultSort('status', 'asc')
         ->headerActions([
             ExportAction::make()
                 ->exporter(ContasPagarExporter::class)
@@ -191,8 +201,10 @@ class ContasPagarResource extends Resource
                         ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filter::make('Aberta')
+                Filter::make('A pagar')
                 ->query(fn (Builder $query): Builder => $query->where('status', false)),
+                Filter::make('Pagas')
+                ->query(fn (Builder $query): Builder => $query->where('status', true)),
                  SelectFilter::make('fornecedor')->relationship('fornecedor', 'nome'),
                  Tables\Filters\Filter::make('data_vencimento')
                     ->form([
@@ -231,9 +243,9 @@ class ContasPagarResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                    
+
                 ]),
-                
+
             ]);
     }
 

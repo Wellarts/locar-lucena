@@ -27,7 +27,7 @@ class ManageContasRecebers extends ManageRecords
                     $vencimentos = Carbon::create($record->data_vencimento);
                     for($cont = 1; $cont < $data['parcelas']; $cont++)
                     {
-                                        $dataVencimentos = $vencimentos->addDays(7);
+                                        $dataVencimentos = $vencimentos->addDays($data['proxima_parcela']);
                                         $parcelas = [
                                         'cliente_id' => $data['cliente_id'],
                                         'valor_total' => $data['valor_total'],
