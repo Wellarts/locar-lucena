@@ -479,7 +479,6 @@ class LocacaoResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('ID'),
-                Tables\Columns\ImageColumn::make('assinatura_contrato'),
                 Tables\Columns\TextColumn::make('cliente.nome')
                     ->sortable()
                     ->searchable()
