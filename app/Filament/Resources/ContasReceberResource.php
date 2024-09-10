@@ -129,7 +129,7 @@ class ContasReceberResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('status', 'asc')
+            ->defaultSort('data_vencimento', 'asc')
             ->headerActions([
                 ExportAction::make()
                     ->exporter(ContasReceberExporter::class)
@@ -202,7 +202,7 @@ class ContasReceberResource extends Resource
             ])
             ->filters([
                 Filter::make('A receber')
-                    ->query(fn(Builder $query): Builder => $query->where('status', false)),
+                    ->query(fn(Builder $query): Builder => $query->where('status', false))->default(true),
                 Filter::make('Recebidas')
                     ->query(fn(Builder $query): Builder => $query->where('status', true)),
                 SelectFilter::make('cliente')->relationship('cliente', 'nome'),
