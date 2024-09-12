@@ -159,7 +159,7 @@ class Dashboard extends \Filament\Pages\Dashboard
             $hoje = Carbon::today();
             $dataVencimento = Carbon::parse($cr->data_vencimento);
             $qtd_dias = $hoje->diffInDays($dataVencimento, false);
-            if ($qtd_dias <= 3 && $qtd_dias >= 0) {
+            if ($qtd_dias <= 3 && $qtd_dias > 0) {
                 Notification::make()
                     ->title('ATENÇÃO: Conta a receber com vencimento próximo.')
                     ->body('Do cliente <b>' . $cr->cliente->nome. '</b> no valor de R$ <b>' . $cr->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cr->data_vencimento)->format('d/m/Y').'</b>.')
@@ -199,7 +199,7 @@ class Dashboard extends \Filament\Pages\Dashboard
             $hoje = Carbon::today();
             $dataVencimento = Carbon::parse($cp->data_vencimento);
             $qtd_dias = $hoje->diffInDays($dataVencimento, false);
-            if ($qtd_dias <= 3 && $qtd_dias >= 0) {
+            if ($qtd_dias <= 3 && $qtd_dias > 0) {
                 Notification::make()
                     ->title('ATENÇÃO: Conta a pagar com vencimento próximo.')
                     ->body('Do fornecedor <b>' . $cp->fornecedor->nome. '</b> no valor de R$ <b>' . $cp->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cp->data_vencimento)->format('d/m/Y').'</b>.')
