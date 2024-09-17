@@ -192,7 +192,6 @@
 </tr>
 </table>
 
-<!-- PÁGINA 2 -->
 
 <div class="container">
     <div class="tela">
