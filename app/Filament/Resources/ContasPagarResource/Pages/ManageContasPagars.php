@@ -46,7 +46,7 @@ class ManageContasPagars extends ManageRecords
                                 $addFluxoCaixa = [
                                     'valor' => ($record->valor_total * -1),
                                     'tipo'  => 'DEBITO',
-                                    'obs'   => 'Pagamento de Conta',
+                                    'obs'   => 'Pagamento da conta do fornecedor '.$record->fornecedor->nome.'',
                                 ];
 
                                 FluxoCaixa::create($addFluxoCaixa);

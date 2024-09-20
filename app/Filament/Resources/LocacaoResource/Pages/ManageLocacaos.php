@@ -44,7 +44,7 @@ class ManageLocacaos extends ManageRecords
                         $veiculo = Veiculo::find($data['veiculo_id']);
                         $veiculo->status_locado = 1;
                         $veiculo->save();
-                        
+
                         #CRIA REGISTO NO FINANCEIRO
                         if ($record->status_financeiro == true and $record->status_pago_financeiro == false) {
                             $valor_parcela = ($record->valor_total_financeiro / $record->parcelas_financeiro);
@@ -65,7 +65,7 @@ class ManageLocacaos extends ManageRecords
 
                                 ];
                                 ContasReceber::create($parcelas);
-                                $vencimentos = $vencimentos->addDays(7);
+                                $vencimentos = $vencimentos->addDays($data['proxima_parcela']);
                             }
                         } elseif ($record->status_financeiro == true and $record->status_pago_financeiro == true) {
 
@@ -87,7 +87,7 @@ class ManageLocacaos extends ManageRecords
                             $addFluxoCaixa = [
                                 'valor' => $data['valor_total_financeiro'],
                                 'tipo'  => 'CREDITO',
-                                'obs'   => 'Recebimento referente da locação nº: ' . $record->id . '',
+                                'obs'   => 'Recebimento da conta do cliente '.$record->cliente->nome.'',
                             ];
 
                             FluxoCaixa::create($addFluxoCaixa);

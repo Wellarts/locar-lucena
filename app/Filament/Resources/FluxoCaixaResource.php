@@ -13,6 +13,7 @@ use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\Filter;
 
 class FluxoCaixaResource extends Resource
 {
@@ -29,38 +30,39 @@ class FluxoCaixaResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('tipo')
-                 ->options([
-                     'CREDITO' => 'CREDITO',
-                     'DEBITO' => 'DEBITO',
-                 ])
-                 ->required(),
+                    ->options([
+                        'CREDITO' => 'CREDITO',
+                        'DEBITO' => 'DEBITO',
+                    ])
+                    ->required(),
 
-             Forms\Components\TextInput::make('valor')
-                 ->numeric()
-                 ->required(),
+                Forms\Components\TextInput::make('valor')
+                    ->numeric()
+                    ->required(),
 
-             Forms\Components\Textarea::make('obs')
+                Forms\Components\Textarea::make('obs')
                     ->label('Descrição')
-                 ->columnSpanFull()
-                 ->required(),
+                    ->columnSpanFull()
+                    ->required(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('tipo')
-                ->searchable()
-                ->badge()
-                ->color(static function ($state): string {
-                    if ($state === 'CREDITO') {
-                        return 'success';
-                    }
+                    ->searchable()
+                    ->badge()
+                    ->color(static function ($state): string {
+                        if ($state === 'CREDITO') {
+                            return 'success';
+                        }
 
-                    return 'danger';
-                })
-                ->sortable(),
+                        return 'danger';
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('valor')
                     ->summarize(Sum::make()->money('BRL')->label('Total'))
                     ->money('BRL'),
@@ -71,14 +73,37 @@ class FluxoCaixaResource extends Resource
                     ->label('Data Hora')
                     ->dateTime()
                     ->sortable(),
-                   // ->toggleable(isToggledHiddenByDefault: true),
+                // ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('CREDITO')
+                    ->label('Crédito')
+                    ->query(fn(Builder $query): Builder => $query->where('tipo', 'CREDITO')),
+                Filter::make('DEBITO')
+                    ->label('Débito')
+                    ->query(fn(Builder $query): Builder => $query->where('tipo', 'DEBITO')),
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('data_de')
+                            ->label('Data de:'),
+                        Forms\Components\DatePicker::make('data_ate')
+                            ->label('Data até:'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when(
+                                $data['data_de'],
+                                fn($query) => $query->whereDate('created_at', '>=', $data['data_de'])
+                            )
+                            ->when(
+                                $data['data_ate'],
+                                fn($query) => $query->whereDate('created_at', '<=', $data['data_ate'])
+                            );
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

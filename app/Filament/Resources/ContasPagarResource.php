@@ -231,7 +231,7 @@ class ContasPagarResource extends Resource
                         $addFluxoCaixa = [
                             'valor' => ($record->valor_parcela * -1),
                             'tipo'  => 'DEBITO',
-                            'obs'   => 'Pagamento de conta',
+                            'obs'   => 'Pagamento da conta do fornecedor '.$record->fornecedor->nome.' da parcela nº: '.$record->ordem_parcela.'',
                         ];
 
                         FluxoCaixa::create($addFluxoCaixa);

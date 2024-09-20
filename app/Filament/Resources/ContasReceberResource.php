@@ -235,7 +235,7 @@ class ContasReceberResource extends Resource
                             $addFluxoCaixa = [
                                 'valor' => ($record->valor_parcela),
                                 'tipo'  => 'CREDITO',
-                                'obs'   => 'Recebimento de conta',
+                                'obs'   => 'Recebimento da conta do cliente '.$record->cliente->nome.' da parcela nº: '.$record->ordem_parcela.'',
                             ];
 
                             FluxoCaixa::create($addFluxoCaixa);

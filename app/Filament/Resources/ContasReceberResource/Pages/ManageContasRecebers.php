@@ -51,7 +51,7 @@ class ManageContasRecebers extends ManageRecords
                     $addFluxoCaixa = [
                         'valor' => ($record->valor_total),
                         'tipo'  => 'CREDITO',
-                        'obs'   => 'Recebimento de Conta',
+                        'obs'   => 'Recebimento da conta do cliente '.$record->cliente->nome.'',
                     ];
 
                     FluxoCaixa::create($addFluxoCaixa);
