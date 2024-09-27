@@ -56,14 +56,14 @@ class VeiculosLucratividadeResource extends Resource
                     ->color('success')
                     ->money('BRL')
                     ->label('Locações')
-                    ->sortable()
+                   // ->sortable()
                     ->getStateUsing(fn(Veiculo $record) => $record->Locacao->sum('valor_total_desconto')),
                 TextColumn::make('valor')
                     ->badge()
                     ->color('danger')
                     ->money('BRL')
                     ->label('Manutenções')
-                    ->sortable()
+                  //  ->sortable()
                     ->getStateUsing(fn(Veiculo $record) => $record->CustoVeiculo->sum('valor')),
                 TextColumn::make('lucratividade')
                     ->badge()
