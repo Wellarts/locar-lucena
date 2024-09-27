@@ -58,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
              //   Widgets\FilamentInfoWidget::class,
                 SomatorioLocacao::class,
-                StatsVeiculos::class,
+               // StatsVeiculos::class,
                 LocacaoMes::class,
                 ContasReceberHoje::class,
                 ContasPagarHoje::class,
