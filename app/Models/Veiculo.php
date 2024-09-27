@@ -55,6 +55,11 @@ class Veiculo extends Model
         return $this->hasMany(CustoVeiculo::class);
     }
 
+    public function Locacao()
+    {
+        return $this->hasMany(Locacao::class);
+    }
+
     public function Temp_lucratividade()
     {
         return $this->hasMany(Temp_lucratividade::class);
