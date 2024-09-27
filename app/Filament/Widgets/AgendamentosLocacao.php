@@ -10,7 +10,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class AgendamentosLocacao extends BaseWidget
 {
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 9;
 
     protected static ?string $heading = 'Próximos Agendamentos';
 

@@ -15,7 +15,7 @@ class ContasReceberHoje extends BaseWidget
 
     protected static ?string $heading = 'Para Receber Hoje';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 6;
 
     public function table(Table $table): Table
     {

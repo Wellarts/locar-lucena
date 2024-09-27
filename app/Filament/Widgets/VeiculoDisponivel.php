@@ -13,6 +13,8 @@ class VeiculoDisponivel extends BaseWidget
 
     protected static ?string $heading = 'Veículos Disponíveis';
 
+    protected static ?int $sort = 3;
+
     public function table(Table $table): Table
     {
         return $table

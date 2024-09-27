@@ -11,7 +11,7 @@ class LocacaoMes extends ChartWidget
 {
     protected static ?string $heading = 'Locações por Mês';
 
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 8;
 
     protected function getData(): array
     {

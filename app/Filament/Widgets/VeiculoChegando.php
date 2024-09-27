@@ -14,6 +14,8 @@ class VeiculoChegando extends BaseWidget
 
     protected static ?string $heading = 'Próximos Retornos';
 
+    protected static ?int $sort = 2;
+
     public function table(Table $table): Table
     {
         return $table

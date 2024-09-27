@@ -14,7 +14,7 @@ class ContasPagarHoje extends BaseWidget
 
     protected static ?string $heading = 'Para Pagar Hoje';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 7;
 
     public function table(Table $table): Table
     {
