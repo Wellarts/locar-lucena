@@ -11,14 +11,14 @@ class ManageCustoVeiculos extends ManageRecords
 {
     protected static string $resource = CustoVeiculoResource::class;
 
-    protected static ?string $title = 'Manutenção de Veículos';
+    protected static ?string $title = 'Despesas/Manutenções';
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\CreateAction::make()
                 ->label('Novo')
-                ->modalHeading('Criar Manutenção')
+                ->modalHeading('Criar Despesa/Manutenção')
                 ->after(function ($data) {
                     
                         $veiculo = Veiculo::find($data['veiculo_id']);

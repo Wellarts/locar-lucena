@@ -25,9 +25,9 @@ class CustoVeiculoResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Manutenção de Veículos';
+    protected static ?string $navigationLabel = 'Despesas/Manuteções';
 
-    protected static ?string $navigationGroup = 'Manutenções';
+    protected static ?string $navigationGroup = 'Despesas com Veículos';
 
 
     public static function form(Form $form): Form
@@ -56,7 +56,7 @@ class CustoVeiculoResource extends Resource
                     ->default(now())
                     ->required(),
                 Forms\Components\Textarea::make('descricao')
-                    ->label('Descrição do Serviço/Peça')
+                    ->label('Descrição')
                     ->autosize()
                     ->columnSpanFull()
                     ->required(false),
