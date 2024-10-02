@@ -34,6 +34,7 @@ class Veiculo extends Model
         'status_locado',
         'obs',
         'documentos',
+        'renavam',
     ];
 
     protected $casts = [

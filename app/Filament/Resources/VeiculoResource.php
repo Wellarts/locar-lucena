@@ -56,14 +56,13 @@ class VeiculoResource extends Resource
                             Forms\Components\DatePicker::make('data_compra'),
                             Forms\Components\TextInput::make('chassi')
                                 ->label('Nº do Chassi'),
+                            Forms\Components\TextInput::make('renavam')
+                                ->maxLength(255),
                             Forms\Components\TextInput::make('valor_diaria')
                                 ->live(onBlur: true)
                                 ->label('Valor Diária')
                                 ->numeric(),
-                            Forms\Components\Textarea::make('obs')
-                                ->autosize()
-                                ->columnSpan(2)
-                                ->label('Observações'),
+                            
                             FileUpload::make('documentos')
                                /* ->columnSpan([
                                     'xl' => 2,
@@ -71,9 +70,14 @@ class VeiculoResource extends Resource
                                 ]) */
                                ->multiple()
                             ->downloadable()
+                            ->columnSpan(2)
                             ->label('Documentos'),
                                
                         ]),
+                        Forms\Components\Textarea::make('obs')
+                                ->autosize()
+                                ->columnSpanFull()
+                                ->label('Observações'),
                         Fieldset::make('Manutenção')
                             ->schema([
                                 Grid::make([
