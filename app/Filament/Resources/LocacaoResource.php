@@ -231,6 +231,34 @@ class LocacaoResource extends Resource
                                         $carro = Veiculo::find($get('veiculo_id'));
                                         $set('valor_total', ($carro->valor_diaria * $qtd_dias));
                                         $set('valor_desconto', '');
+
+                                        ### CALCULO DOS DIAS E SEMANAS
+                                        $diferencaEmDias = $dt_saida->diffInDays($dt_retorno);
+                                        // Calculando a diferença em semanas
+                                        $diferencaEmSemanas = $diferencaEmDias / 7;
+                                        
+                                        // Arredondando para baixo para obter o número inteiro de semanas
+                                        $semanasCompletas = floor($diferencaEmSemanas);
+                                        // Calculando os dias restantes (módulo 7)
+                                        $diasRestantes = $diferencaEmDias % 7;
+                                        //Calculando os meses
+                                        $mesesCompleto = $diferencaEmDias / 30;
+                                        //Calculando os meses em número inteiro
+                                        $mesesCompleto = floor($mesesCompleto);
+                                        //Calculando semanas restantes
+                                        $diasRestantesMeses = $diferencaEmDias % 30;
+     
+                                        Notification::make()
+                                            ->title('ATENÇÃO')
+                                            ->body(
+                                                'Para as datas escolhida temos:<br>
+                                                <b>'.$qtd_dias.' DIA(AS).</b><br>
+                                                <b>'.$semanasCompletas.' SEMANA(AS) e '.$diasRestantes.' DIA(AS). </b> <br>
+                                                <b>'.$mesesCompleto.' MÊS/MESES  e '.$diasRestantesMeses.' DIA(AS).</b><br>
+                                            ')                                            
+                                            ->danger()
+                                            ->persistent()
+                                            ->send();
                                     })
                                     ->required(false),
                                 Forms\Components\TimePicker::make('hora_retorno')
@@ -382,7 +410,7 @@ class LocacaoResource extends Resource
                                                     ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->required(fn(Get $get): bool => $get('status_financeiro'))
                                                     ->displayFormat('d/m/Y')
-                                                   // ->default(fn(Get $get) => Carbon::now()->addDays($get('proxima_parcela'))->format('Y-m-d'))
+                                                    // ->default(fn(Get $get) => Carbon::now()->addDays($get('proxima_parcela'))->format('Y-m-d'))
 
                                                     ->label("Vencimento da 1º"),
 
@@ -479,6 +507,7 @@ class LocacaoResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->label('ID'),
+
                 Tables\Columns\TextColumn::make('cliente.nome')
                     ->sortable()
                     ->searchable()
