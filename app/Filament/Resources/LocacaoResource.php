@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\LocacaoExporter;
 use App\Filament\Resources\LocacaoResource\Pages;
 use App\Filament\Resources\LocacaoResource\RelationManagers;
 use App\Filament\Resources\LocacaoResource\RelationManagers\OcorrenciaRelationManager;
@@ -11,6 +12,8 @@ use App\Models\Locacao;
 use App\Models\Veiculo;
 use Carbon\Carbon;
 use DateTime;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -502,6 +505,16 @@ class LocacaoResource extends Resource
     {
         return $table
             ->defaultSort('id', 'desc')
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(LocacaoExporter::class)
+                    ->formats([
+                        ExportFormat::Xlsx,
+                    ])
+                    ->columnMapping(false)
+                    ->label('Exportar')
+                    ->modalHeading('Confirmar exportação?')
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->sortable()

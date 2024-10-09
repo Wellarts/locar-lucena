@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\CustoVeiculoExporter;
 use App\Filament\Resources\CustoVeiculoResource\Pages;
 use App\Filament\Resources\CustoVeiculoResource\RelationManagers;
 use App\Models\CustoVeiculo;
 use App\Models\Fornecedor;
 use App\Models\Veiculo;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
@@ -71,6 +74,16 @@ class CustoVeiculoResource extends Resource
     {
         return $table
             ->defaultSort('id', 'desc')
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(CustoVeiculoExporter::class)
+                    ->formats([
+                        ExportFormat::Xlsx,
+                    ])
+                    ->columnMapping(false)
+                    ->label('Exportar')
+                    ->modalHeading('Confirmar exportação?')
+            ])
             ->columns([
                 Tables\Columns\TextColumn::make('fornecedor.nome')
                 ->sortable(),

@@ -18,8 +18,8 @@ class TotalLucratividade extends BaseWidget
                 ->description('Total de Locações')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('warning'),
-            Stat::make('Manutenções', number_format(CustoVeiculo::all()->sum('valor'), 2, ",", "."))
-                ->description('Total de Manutenções')
+            Stat::make('Manutenções/Despesas', number_format(CustoVeiculo::all()->sum('valor'), 2, ",", "."))
+                ->description('Total de Manutenções/Despesas')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('danger'),
             Stat::make('Locações - Manutenções', number_format(Locacao::all()->sum('valor_total_desconto') - CustoVeiculo::all()->sum('valor'), 2, ",", "."))
