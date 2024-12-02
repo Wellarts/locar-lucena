@@ -79,7 +79,6 @@ class LocacaoResource extends Resource
                                     ])
                                     ->live()
                                     ->required(false)
-                                    // ->options(Cliente::all()->pluck('nome', 'id')->toArray())
                                     ->relationship('cliente', 'nome')
                                     ->createOptionForm([
                                         Grid::make([
@@ -124,7 +123,7 @@ class LocacaoResource extends Resource
                                                         }
                                                         return $estado->cidade->pluck('nome', 'id');
                                                     })
-                                                    ->reactive(),
+                                                    ->live(),
                                                 Forms\Components\TextInput::make('telefone_1')
                                                     ->label('Telefone 1')
                                                     ->tel()
@@ -189,7 +188,6 @@ class LocacaoResource extends Resource
                                     ->live(onBlur: true)
                                     ->relationship(
                                         name: 'veiculo',
-                                        // modifyQueryUsing: fn (Builder $query) =>  $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa'),
                                         modifyQueryUsing: function (Builder $query, $context) {
                                             if ($context === 'create') {
                                                 $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa');
@@ -224,7 +222,7 @@ class LocacaoResource extends Resource
                                 Forms\Components\DatePicker::make('data_retorno')
                                     ->displayFormat('d/m/Y')
                                     ->label('Data Retorno')
-                                    ->reactive()
+                                    ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, callable $set, Get $get) {
                                         $dt_saida = Carbon::parse($get('data_saida'));
                                         $dt_retorno = Carbon::parse($get('data_retorno'));
@@ -233,13 +231,14 @@ class LocacaoResource extends Resource
 
                                         $carro = Veiculo::find($get('veiculo_id'));
                                         $set('valor_total', ($carro->valor_diaria * $qtd_dias));
-                                        $set('valor_desconto', '');
+                                        $set('valor_desconto', 0);
+                                        $set('valor_total_desconto', ($carro->valor_diaria * $qtd_dias));
 
                                         ### CALCULO DOS DIAS E SEMANAS
                                         $diferencaEmDias = $dt_saida->diffInDays($dt_retorno);
                                         // Calculando a diferença em semanas
                                         $diferencaEmSemanas = $diferencaEmDias / 7;
-                                        
+
                                         // Arredondando para baixo para obter o número inteiro de semanas
                                         $semanasCompletas = floor($diferencaEmSemanas);
                                         // Calculando os dias restantes (módulo 7)
@@ -250,15 +249,16 @@ class LocacaoResource extends Resource
                                         $mesesCompleto = floor($mesesCompleto);
                                         //Calculando semanas restantes
                                         $diasRestantesMeses = $diferencaEmDias % 30;
-     
+
                                         Notification::make()
                                             ->title('ATENÇÃO')
                                             ->body(
                                                 'Para as datas escolhida temos:<br>
-                                                <b>'.$qtd_dias.' DIA(AS).</b><br>
-                                                <b>'.$semanasCompletas.' SEMANA(AS) e '.$diasRestantes.' DIA(AS). </b> <br>
-                                                <b>'.$mesesCompleto.' MÊS/MESES  e '.$diasRestantesMeses.' DIA(AS).</b><br>
-                                            ')                                            
+                                                <b>' . $qtd_dias . ' DIA(AS).</b><br>
+                                                <b>' . $semanasCompletas . ' SEMANA(AS) e ' . $diasRestantes . ' DIA(AS). </b> <br>
+                                                <b>' . $mesesCompleto . ' MÊS/MESES  e ' . $diasRestantesMeses . ' DIA(AS).</b><br>
+                                            '
+                                            )
                                             ->danger()
                                             ->persistent()
                                             ->send();
@@ -287,17 +287,19 @@ class LocacaoResource extends Resource
                                 Forms\Components\TextInput::make('valor_total')
                                     ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #D33644;'])
                                     ->label('Valor Total')
-                                    ->numeric()
-                                    // ->currencyMask(thousandSeparator: '.',decimalSeparator: ',',precision: 2)
+                                    ->prefix('R$')
+                                    ->inputMode('decimal')
+                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
                                     ->readOnly()
                                     ->required(false),
                                 Forms\Components\TextInput::make('valor_desconto')
                                     ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #3668D3;'])
                                     ->label('Desconto')
-                                    // ->numeric()
+                                    ->numeric()
+                                    ->prefix('R$')
+                                    ->inputMode('decimal')
                                     ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
                                     ->required(true)
-                                    // ->live(debounce: 500)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, callable $set, Get $get,) {
                                         $set('valor_total_desconto', ((float)$get('valor_total') - (float)$get('valor_desconto')));
@@ -305,27 +307,16 @@ class LocacaoResource extends Resource
                                 Forms\Components\TextInput::make('valor_total_desconto')
                                     ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #17863E;'])
                                     ->label('Valor Total com Desconto')
-                                    // ->currencyMask(thousandSeparator: '.',decimalSeparator: ',',precision: 2)
+                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
                                     ->numeric()
+                                    ->prefix('R$')
+                                    ->inputMode('decimal')
                                     ->readOnly()
                                     ->required(false),
                                 Forms\Components\Textarea::make('obs')
                                     ->autosize()
                                     ->columnSpanFull()
                                     ->label('Observações'),
-
-
-                                // SignaturePad::make('assinatura_contrato')
-                                //     ->columnSpanFull()
-                                //     ->label('Assinatura do Contrato')
-                                //     ->backgroundColor('#FFFFFF')
-                                //     ->backgroundColorOnDark('#FFFFFF')
-                                //     ->penColor('#1C1C1C')
-                                //     ->penColorOnDark('#1C1C1C'),
-
-
-
-
                                 Fieldset::make('Financeiro')
                                     ->schema([
                                         Grid::make([
@@ -413,24 +404,24 @@ class LocacaoResource extends Resource
                                                     ->disabled(fn(string $context): bool => $context === 'edit')
                                                     ->required(fn(Get $get): bool => $get('status_financeiro'))
                                                     ->displayFormat('d/m/Y')
-                                                    // ->default(fn(Get $get) => Carbon::now()->addDays($get('proxima_parcela'))->format('Y-m-d'))
-
                                                     ->label("Vencimento da 1º"),
-
                                                 Forms\Components\TextInput::make('valor_parcela_financeiro')
                                                     ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
                                                     ->disabled(fn(string $context): bool => $context === 'edit')
+                                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
                                                     ->numeric()
+                                                    ->prefix('R$')
+                                                    ->inputMode('decimal')
                                                     ->label('Valor da Parcela')
                                                     ->readOnly()
                                                     ->required(false),
                                                 Forms\Components\TextInput::make('valor_total_financeiro')
                                                     ->hidden(fn(Get $get): bool => !$get('status_financeiro'))
                                                     ->disabled(fn(string $context): bool => $context === 'edit')
-                                                    ->default(function (Get $get) {
-                                                        return 200;
-                                                    })
+                                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
                                                     ->numeric()
+                                                    ->prefix('R$')
+                                                    ->inputMode('decimal')
                                                     ->label('Valor Total')
                                                     ->readOnly()
                                                     ->required(false),
@@ -548,8 +539,6 @@ class LocacaoResource extends Resource
                         $hoje = Carbon::today();
                         $dataRetorno = Carbon::parse($state);
                         $qtd_dias = $hoje->diffInDays($dataRetorno, false);
-                        //  dd($qtd_dias.' - '.$dataSaida.' - '.$hoje);
-                        // echo $qtd_dias;
 
                         if ($qtd_dias <= 3 && $qtd_dias >= 0) {
                             return 'warning';
@@ -575,12 +564,6 @@ class LocacaoResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('qtd_diarias')
                     ->label('Qtd Diárias'),
-                // Tables\Columns\TextColumn::make('valor_total')
-                //     ->money('BRL')
-                //     ->label('Valor Total'),
-                // Tables\Columns\TextColumn::make('valor_desconto')
-                //     ->money('BRL')
-                //     ->label('Desconto'),
                 Tables\Columns\TextColumn::make('valor_total_desconto')
                     ->summarize(Sum::make()->money('BRL')->label('Total'))
                     ->money('BRL')
