@@ -14,6 +14,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -39,7 +40,8 @@ class VeiculoResource extends Resource
                             'xl' => 3,
                             '2xl' => 3,
                         ])->schema([
-                            Forms\Components\TextInput::make('modelo'),
+                            Forms\Components\TextInput::make('modelo')
+                                ->required(),
                             Forms\Components\Select::make('marca_id')
                                 ->label('Marca')
                                 ->required()
@@ -59,25 +61,29 @@ class VeiculoResource extends Resource
                             Forms\Components\TextInput::make('renavam')
                                 ->maxLength(255),
                             Forms\Components\TextInput::make('valor_diaria')
+                                ->prefix('R$')
                                 ->live(onBlur: true)
                                 ->label('Valor Diária')
                                 ->numeric(),
-                            
+
                             FileUpload::make('documentos')
-                               /* ->columnSpan([
+                                /* ->columnSpan([
                                     'xl' => 2,
                                     '2xl' => 2,
                                 ]) */
-                               ->multiple()
-                            ->downloadable()
-                            ->columnSpan(2)
-                            ->label('Documentos'),
-                               
+                                ->multiple()
+                                ->downloadable()
+                                ->columnSpan([
+                                    'xl' => 2,
+                                    '2xl' => 2,
+                                ])
+                                ->label('Documentos'),
+
                         ]),
                         Forms\Components\Textarea::make('obs')
-                                ->autosize()
-                                ->columnSpanFull()
-                                ->label('Observações'),
+                            ->autosize()
+                            ->columnSpanFull()
+                            ->label('Observações'),
                         Fieldset::make('Manutenção')
                             ->schema([
                                 Grid::make([
@@ -162,23 +168,50 @@ class VeiculoResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('marca.nome'),
-                Tables\Columns\TextColumn::make('ano'),
+                Tables\Columns\TextColumn::make('ano')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('placa')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('cor'),
+                Tables\Columns\TextColumn::make('cor')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('km_atual')
+                    ->sortable()
                     ->label('Km Atual'),
                 Tables\Columns\TextColumn::make('valor_diaria')
                     ->label('Valor Diária')
                     ->money('BRL'),
-                Tables\Columns\IconColumn::make('status')
-                    ->sortable()
-                    ->boolean(),
-                Tables\Columns\IconColumn::make('status_locado')
+                Tables\Columns\TextColumn::make('status')
+                    ->Label('Status')
+                    ->badge()
                     ->alignCenter()
-                    ->label('Status de Locação')
-                    ->sortable()
-                    ->boolean(),
+                    ->color(fn(string $state): string => match ($state) {
+                        '0' => 'danger',
+                        '1' => 'success',
+                    })
+                    ->formatStateUsing(function ($state) {
+                        if ($state == 1) {
+                            return 'Ativado';
+                        }
+                        if ($state == 0) {
+                            return 'Desativdo';
+                        }
+                    }),
+                Tables\Columns\TextColumn::make('status_locado')
+                    ->Label('Status Locação')
+                    ->badge()
+                    ->alignCenter()
+                    ->color(fn(string $state): string => match ($state) {
+                        '1' => 'danger',
+                        '0' => 'success',
+                    })
+                    ->formatStateUsing(function ($state) {
+                        if ($state == 1) {
+                            return 'Locado';
+                        }
+                        if ($state == 0) {
+                            return 'Disponível';
+                        }
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -189,14 +222,17 @@ class VeiculoResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Filter::make('Ativos')
+                Filter::make('Ativados')
                     ->query(fn(Builder $query): Builder => $query->where('status', true)),
-                Filter::make('Inativos')
+                Filter::make('Desativados')
                     ->query(fn(Builder $query): Builder => $query->where('status', false)),
                 Filter::make('Locados')
                     ->query(fn(Builder $query): Builder => $query->where('status_locado', 1)),
                 Filter::make('Disponíveis')
                     ->query(fn(Builder $query): Builder => $query->where('status_locado', 0)),
+                SelectFilter::make('Marcas')->searchable()->relationship('marca', 'nome')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
