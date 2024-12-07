@@ -31,17 +31,21 @@ class FluxoCaixaResource extends Resource
             ->schema([
                 Forms\Components\Select::make('tipo')
                     ->options([
-                        'CREDITO' => 'CREDITO',
-                        'DEBITO' => 'DEBITO',
+                        'CREDITO' => 'CRÉDITO',
+                        'DEBITO' => 'DÉBITO',
                     ])
                     ->required(),
 
                 Forms\Components\TextInput::make('valor')
+                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
                     ->numeric()
+                    ->prefix('R$')
+                    ->inputMode('decimal')
                     ->required(),
 
                 Forms\Components\Textarea::make('obs')
                     ->label('Descrição')
+                    ->autosize()
                     ->columnSpanFull()
                     ->required(),
             ]);

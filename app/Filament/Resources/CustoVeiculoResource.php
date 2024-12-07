@@ -37,20 +37,20 @@ class CustoVeiculoResource extends Resource
     {
         return $form
             ->schema([
-                    Forms\Components\Select::make('fornecedor_id')
-                        ->searchable()
-                        ->label('Fornecedor')
-                        ->required()
-                        ->options(Fornecedor::all()->pluck('nome', 'id')->toArray()),
-                    Forms\Components\Select::make('veiculo_id')
-                        ->required()
-                        ->label('Veículo')
-                        ->relationship(
-                            name: 'veiculo',
-                            modifyQueryUsing: fn (Builder $query) => $query->orderBy('modelo')->orderBy('placa'),
-                        )
-                        ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->modelo} {$record->placa}")
-                        ->searchable(['modelo', 'placa']),
+                Forms\Components\Select::make('fornecedor_id')
+                    ->searchable()
+                    ->label('Fornecedor')
+                    ->required()
+                    ->options(Fornecedor::all()->pluck('nome', 'id')->toArray()),
+                Forms\Components\Select::make('veiculo_id')
+                    ->required()
+                    ->label('Veículo')
+                    ->relationship(
+                        name: 'veiculo',
+                        modifyQueryUsing: fn(Builder $query) => $query->orderBy('modelo')->orderBy('placa'),
+                    )
+                    ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->modelo} {$record->placa}")
+                    ->searchable(['modelo', 'placa']),
 
                 Forms\Components\TextInput::make('km_atual')
                     ->label('Km Atual')
@@ -65,7 +65,10 @@ class CustoVeiculoResource extends Resource
                     ->required(false),
                 Forms\Components\TextInput::make('valor')
                     ->label('Valor Total')
+                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
                     ->numeric()
+                    ->prefix('R$')
+                    ->inputMode('decimal')
                     ->required(),
             ]);
     }
@@ -86,51 +89,55 @@ class CustoVeiculoResource extends Resource
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('fornecedor.nome')
-                ->sortable(),
-            Tables\Columns\TextColumn::make('veiculo.modelo')
-                ->sortable()
-                ->label('Veículo'),
-            Tables\Columns\TextColumn::make('veiculo.placa')
-                ->label('Placa'),
-            Tables\Columns\TextColumn::make('km_atual')
-                ->label('Km Atual'),
-            Tables\Columns\TextColumn::make('data')
-                ->sortable()
-                ->date('d/m/Y'),
-            Tables\Columns\TextColumn::make('valor')
-                ->summarize(Sum::make()->money('BRL')->label('Total'))
-                ->money('BRL')
-                ->label('Valor Total'),
-            Tables\Columns\TextColumn::make('created_at')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\TextColumn::make('updated_at')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
-        ])
-        ->filters([
-            SelectFilter::make('fornecedor')->searchable()->relationship('fornecedor', 'nome'),
-            SelectFilter::make('veiculo')->searchable()->relationship('veiculo', 'placa')->label('Veículo - (Placa)'),
-            Tables\Filters\Filter::make('datas')
-            ->form([
-                DatePicker::make('data_de')
-                    ->label('Saída de:'),
-                DatePicker::make('data_ate')
-                    ->label('Saída ate:'),
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('veiculo.modelo')
+                    ->sortable()
+                    ->label('Veículo'),
+                Tables\Columns\TextColumn::make('veiculo.placa')
+                    ->label('Placa'),
+                Tables\Columns\TextColumn::make('km_atual')
+                    ->label('Km Atual'),
+                Tables\Columns\TextColumn::make('data')
+                    ->sortable()
+                    ->date('d/m/Y'),
+                Tables\Columns\TextColumn::make('valor')
+                    ->summarize(Sum::make()->money('BRL')->label('Total'))
+                    ->money('BRL')
+                    ->label('Valor Total'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->query(function ($query, array $data) {
-                return $query
-                    ->when($data['data_de'],
-                        fn($query) => $query->whereDate('data', '>=', $data['data_de']))
-                    ->when($data['data_ate'],
-                        fn($query) => $query->whereDate('data', '<=', $data['data_ate']));
-           })
-        ])
+            ->filters([
+                SelectFilter::make('fornecedor')->searchable()->relationship('fornecedor', 'nome'),
+                SelectFilter::make('veiculo')->searchable()->relationship('veiculo', 'placa')->label('Veículo - (Placa)'),
+                Tables\Filters\Filter::make('datas')
+                    ->form([
+                        DatePicker::make('data_de')
+                            ->label('Saída de:'),
+                        DatePicker::make('data_ate')
+                            ->label('Saída ate:'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when(
+                                $data['data_de'],
+                                fn($query) => $query->whereDate('data', '>=', $data['data_de'])
+                            )
+                            ->when(
+                                $data['data_ate'],
+                                fn($query) => $query->whereDate('data', '<=', $data['data_ate'])
+                            );
+                    })
+            ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                ->modalHeading('Editar custo veículo'),
+                    ->modalHeading('Editar custo veículo'),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
