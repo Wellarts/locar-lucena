@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
 
+
 class Dashboard extends \Filament\Pages\Dashboard
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
