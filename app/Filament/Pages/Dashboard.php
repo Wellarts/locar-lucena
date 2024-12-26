@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Agendamento;
 use App\Models\ContasPagar;
 use App\Models\ContasReceber;
 use App\Models\Veiculo;
@@ -231,5 +232,47 @@ class Dashboard extends \Filament\Pages\Dashboard
 
             }
         }
+
+         //***********NOTIFICAÇÃO DE AGENDAMENTOS*************
+         $agendamentos = Agendamento::where('status','=','0')->get();
+         $hoje = Carbon::today();
+
+         foreach ($agendamentos as $agendamento) {
+             $hoje = Carbon::today();
+             $dataSaida = Carbon::parse($agendamento->data_saida);
+
+             $qtd_dias = $hoje->diffInDays($dataSaida, false);
+            // dd($agendamento);
+             if ($qtd_dias <= 4 && $qtd_dias > 0) {
+                 Notification::make()
+                     ->title('ATENÇÃO: Agendamento com data de saída próximo.')
+                     ->body('Do cliente <b>' . $agendamento->cliente->nome. '</b> com data de saída em <b>'.carbon::parse($agendamento->data_saida)->format('d/m/Y').'</b>.')
+                     ->success()
+                     ->persistent()
+                     ->send();
+
+
+             }
+             if ($qtd_dias == 0) {
+                 Notification::make()
+                     ->title('ATENÇÃO: Agendamento com data de saída para hoje.')
+                     ->body('Do cliente <b>' . $agendamento->cliente->nome. '</b> com data de saída em <b>'.carbon::parse($agendamento->data_saida)->format('d/m/Y').'</b>.')
+                     ->warning()
+                     ->persistent()
+                     ->send();
+
+
+             }
+             if ($qtd_dias < 0) {
+                Notification::make()
+                     ->title('ATENÇÃO: Agendamento atrasado.')
+                     ->body('Do cliente <b>' . $agendamento->cliente->nome. '</b> com data de saída em <b>'.carbon::parse($agendamento->data_saida)->format('d/m/Y').'</b>.')
+                     ->danger()
+                     ->persistent()
+                     ->send();
+
+
+             }
+         }
     }
 }
