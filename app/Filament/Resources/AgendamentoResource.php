@@ -11,6 +11,7 @@ use App\Models\Estado;
 use Filament\Forms\Components\FileUpload;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Support\RawJs;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
@@ -20,6 +21,8 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -260,9 +263,9 @@ class AgendamentoResource extends Resource
                                     ->required(true)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                    $valorRestante =  ((float)$get('valor_total') - ((float)$get('valor_pago') + (float)$state));
-                                    $set('valor_restante', $valorRestante);
-                                }),
+                                        $valorRestante =  ((float)$get('valor_total') - ((float)$get('valor_pago') + (float)$state));
+                                        $set('valor_restante', $valorRestante);
+                                    }),
                                 Forms\Components\TextInput::make('valor_pago')
                                     ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #D33644;'])
                                     ->label('Valor Pago')
@@ -342,8 +345,8 @@ class AgendamentoResource extends Resource
                     ->money('BRL'),
                 Tables\Columns\TextColumn::make('obs')
                     ->label('Observações'),
-                    Tables\Columns\TextColumn::make('status')
-                   // ->summarize(Count::make())
+                Tables\Columns\TextColumn::make('status')
+                    // ->summarize(Count::make())
                     ->Label('Status')
                     ->badge()
                     ->alignCenter()
@@ -369,7 +372,29 @@ class AgendamentoResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('Agendados')
+                    ->query(fn(Builder $query): Builder => $query->where('status', false))
+                    ->default(1),
+                SelectFilter::make('cliente')->searchable()->relationship('cliente', 'nome'),
+                SelectFilter::make('veiculo')->searchable()->relationship('veiculo', 'placa'),
+                Tables\Filters\Filter::make('datas')
+                    ->form([
+                        DatePicker::make('data_saida_de')
+                            ->label('Saída de:'),
+                        DatePicker::make('data_saida_ate')
+                            ->label('Saída ate:'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when(
+                                $data['data_saida_de'],
+                                fn($query) => $query->whereDate('data_saida', '>=', $data['data_saida_de'])
+                            )
+                            ->when(
+                                $data['data_saida_ate'],
+                                fn($query) => $query->whereDate('data_saida', '<=', $data['data_saida_ate'])
+                            );
+                    })
             ])
             ->actions([
                 Tables\Actions\Action::make('Imprimir')
