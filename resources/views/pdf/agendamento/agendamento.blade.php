@@ -56,13 +56,14 @@
 
 <table style="width: 100%">
     <tr>
-      <td><img src="{{ asset('img/logo-lucena.jpg') }}" alt="Image" height="30" width="90"></td>
-      <td> <p style="width: 100%; font-size:28px; font-weight: bold;" align="center">Locadora Lucena</p>
-           <p style="font-size:16px;" align="center">Av. Cesário de Melo, nº 4030 Campo Grande - Rio de Janeiro - RJ.<br>
-                                                    Contato: (21)7402-1183<br>
-                                                    Email: erike@rdbled.com.br - CNPJ: 53-825-708/0001-48</p>
-      </td>
-  </tr>
+        <td><img src="{{ asset('img/logo-lucena.png') }}" alt="Image" height="60" width="180"></td>
+        <td> <p style="width: 100%; font-size:28px; font-weight: bold;" align="center">Locadora Lucena</p>
+             <p style="font-size:16px;" align="center">Locadora de Veículos - LUCENA</p>
+             <p style="font-size:16px;" align="center">Av. Agamenon Magalhães, nº 160c Centro - Lajedo - PE.<br>
+                                                      Contato: (87)9-9608-0251 (87)9-9602-9051<br>
+                                                      Email: fllocacaodeveiculos@gmail.com - CNPJ: 23-413-119/0001-91</p>
+        </td>
+    </tr>
 
   </table>
     <div class="retangulo">
