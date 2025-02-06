@@ -634,11 +634,17 @@ class LocacaoResource extends Resource
                             $veiculo->save();
                         }
                     }),
-                Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                    ->before(function ($record) {
+                            $veiculo = Veiculo::find($record->veiculo_id);
+                            $veiculo->status_locado = 0;
+                            $veiculo->save();
+                        
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                  //  Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
