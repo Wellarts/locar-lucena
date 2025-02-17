@@ -31,6 +31,7 @@ class ManageContasRecebers extends ManageRecords
                                         $parcelas = [
                                         'cliente_id' => $data['cliente_id'],
                                         'valor_total' => $data['valor_total'],
+                                        'categoria_id' => $data['categoria_id'],
                                         'parcelas' => $data['parcelas'],
                                         'formaPgmto' => $data['formaPgmto'],
                                         'ordem_parcela' => $cont+1,

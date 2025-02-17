@@ -19,7 +19,9 @@ class CustoVeiculo extends Model
         'data',
         'descricao',
         'valor',
-           
+        'categoria_id',
+
+
     ];
 
     public function Veiculo()
@@ -29,14 +31,18 @@ class CustoVeiculo extends Model
 
     public function Fornecedor()
     {
-     return $this->belongsTo(Fornecedor::class);
+        return $this->belongsTo(Fornecedor::class);
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class);
     }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-        ->logOnly(['*']);
+            ->logOnly(['*']);
         // Chain fluent methods for configuration options
     }
-
 }

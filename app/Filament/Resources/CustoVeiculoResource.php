@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\CustoVeiculoExporter;
 use App\Filament\Resources\CustoVeiculoResource\Pages;
 use App\Filament\Resources\CustoVeiculoResource\RelationManagers;
+use App\Models\Categoria;
 use App\Models\CustoVeiculo;
 use App\Models\Fornecedor;
 use App\Models\Veiculo;
@@ -55,6 +56,16 @@ class CustoVeiculoResource extends Resource
                 Forms\Components\TextInput::make('km_atual')
                     ->label('Km Atual')
                     ->required(false),
+                Forms\Components\Select::make('categoria_id')
+                    ->label('Categoria')
+                    ->searchable()
+                    ->relationship('categoria', 'nome')
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('nome')
+                            ->label('Nome')
+                            ->required(),
+                    ]),
+
                 Forms\Components\DatePicker::make('data')
                     ->default(now())
                     ->required(),
@@ -95,6 +106,10 @@ class CustoVeiculoResource extends Resource
                     ->label('Veículo'),
                 Tables\Columns\TextColumn::make('veiculo.placa')
                     ->label('Placa'),
+                Tables\Columns\TextColumn::make('categoria.nome')
+                    ->label('Categoria')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('km_atual')
                     ->label('Km Atual'),
                 Tables\Columns\TextColumn::make('data')

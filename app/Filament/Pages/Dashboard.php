@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Agendamento;
 use App\Models\ContasPagar;
 use App\Models\ContasReceber;
 use App\Models\Veiculo;
@@ -17,7 +16,6 @@ use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Support\Facades\Route;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
-
 
 class Dashboard extends \Filament\Pages\Dashboard
 {
@@ -120,7 +118,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca de óleo próxima. Faltam ' . $veiculo->prox_troca_oleo - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
 
@@ -129,7 +127,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca do filtro próxima.  Faltam ' . $veiculo->prox_troca_filtro - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
 
@@ -138,7 +136,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca da correia próxima.  Faltam ' . $veiculo->prox_troca_correia - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
 
@@ -147,7 +145,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca da pastilha próxima.  Faltam ' . $veiculo->prox_troca_pastilha - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        ->persistent()
+                        //->persistent()
                         ->send();
                 }
             }
@@ -166,7 +164,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a receber com vencimento próximo.')
                     ->body('Do cliente <b>' . $cr->cliente->nome. '</b> no valor de R$ <b>' . $cr->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cr->data_vencimento)->format('d/m/Y').'</b>.')
                     ->success()
-                    ->persistent()
+                    //->persistent()
                     ->send();
 
 
@@ -176,7 +174,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a receber com vencimento para hoje.')
                     ->body('Do cliente <b>' . $cr->cliente->nome. '</b> no valor de R$ <b>' . $cr->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cr->data_vencimento)->format('d/m/Y').'</b>.')
                     ->warning()
-                    ->persistent()
+                    //->persistent()
                     ->send();
 
 
@@ -186,7 +184,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a receber vencida.')
                     ->body('Do cliente <b>' . $cr->cliente->nome. '</b> no valor de R$ <b>' . $cr->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cr->data_vencimento)->format('d/m/Y').'</b>.')
                     ->danger()
-                    ->persistent()
+                    //->persistent()
                     ->send();
 
 
@@ -206,7 +204,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a pagar com vencimento próximo.')
                     ->body('Do fornecedor <b>' . $cp->fornecedor->nome. '</b> no valor de R$ <b>' . $cp->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cp->data_vencimento)->format('d/m/Y').'</b>.')
                     ->success()
-                    ->persistent()
+                    //->persistent()
                     ->send();
 
 
@@ -216,7 +214,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a pagar com vencimento para hoje.')
                     ->body('Do fornecedor <b>' . $cp->fornecedor->nome. '</b> no valor de R$ <b>' . $cp->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cp->data_vencimento)->format('d/m/Y').'</b>.')
                     ->warning()
-                    ->persistent()
+                    //->persistent()
                     ->send();
 
 
@@ -226,53 +224,11 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a pagar vencida.')
                     ->body('Do fornecedor <b>' . $cp->fornecedor->nome. '</b> no valor de R$ <b>' . $cp->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cp->data_vencimento)->format('d/m/Y').'</b>.')
                     ->danger()
-                    ->persistent()
+                    //->persistent()
                     ->send();
 
 
             }
         }
-
-         //***********NOTIFICAÇÃO DE AGENDAMENTOS*************
-         $agendamentos = Agendamento::where('status','=','0')->get();
-         $hoje = Carbon::today();
-
-         foreach ($agendamentos as $agendamento) {
-             $hoje = Carbon::today();
-             $dataSaida = Carbon::parse($agendamento->data_saida);
-
-             $qtd_dias = $hoje->diffInDays($dataSaida, false);
-            // dd($agendamento);
-             if ($qtd_dias <= 4 && $qtd_dias > 0) {
-                 Notification::make()
-                     ->title('ATENÇÃO: Agendamento com data de saída próximo.')
-                     ->body('Do cliente <b>' . $agendamento->cliente->nome. '</b> com data de saída em <b>'.carbon::parse($agendamento->data_saida)->format('d/m/Y').'</b>.')
-                     ->success()
-                     ->persistent()
-                     ->send();
-
-
-             }
-             if ($qtd_dias == 0) {
-                 Notification::make()
-                     ->title('ATENÇÃO: Agendamento com data de saída para hoje.')
-                     ->body('Do cliente <b>' . $agendamento->cliente->nome. '</b> com data de saída em <b>'.carbon::parse($agendamento->data_saida)->format('d/m/Y').'</b>.')
-                     ->warning()
-                     ->persistent()
-                     ->send();
-
-
-             }
-             if ($qtd_dias < 0) {
-                Notification::make()
-                     ->title('ATENÇÃO: Agendamento atrasado.')
-                     ->body('Do cliente <b>' . $agendamento->cliente->nome. '</b> com data de saída em <b>'.carbon::parse($agendamento->data_saida)->format('d/m/Y').'</b>.')
-                     ->danger()
-                     ->persistent()
-                     ->send();
-
-
-             }
-         }
     }
 }

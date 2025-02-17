@@ -30,6 +30,7 @@ class ManageContasPagars extends ManageRecords
                                 $parcelas = [
                                     'fornecedor_id' => $data['fornecedor_id'],
                                     'valor_total' => $data['valor_total'],
+                                    'categoria_id' => $data['categoria_id'],
                                     'parcelas' => $data['parcelas'],
                                     'formaPgmto' => $data['formaPgmto'],
                                     'ordem_parcela' => $cont + 1,

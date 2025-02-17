@@ -22,12 +22,18 @@ class ContasReceber extends Model
         'valor_total',
         'valor_parcela',
         'valor_recebido',
-        'obs'
+        'obs',
+        'categoria_id',
     ];
 
     public function Cliente()
     {
         return $this->belongsTo(Cliente::class);
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class);
     }
 
     public function getActivitylogOptions(): LogOptions

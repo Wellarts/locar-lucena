@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\ContasPagarExporter;
 use App\Filament\Resources\ContasPagarResource\Pages;
 use App\Filament\Resources\ContasPagarResource\RelationManagers;
+use App\Models\Categoria;
 use App\Models\ContasPagar;
 use App\Models\FluxoCaixa;
 use App\Models\Fornecedor;
@@ -67,6 +68,16 @@ class ContasPagarResource extends Resource
                     ->prefix('R$')
                     ->inputMode('decimal')
                     ->required(),
+                Forms\Components\Select::make('categoria_id')
+                    ->label('Categoria')
+                    ->searchable()
+                    ->relationship('categoria', 'nome')
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('nome')
+                            ->label('Nome')
+                            ->required(),
+                    ]),
+                    
                 Forms\Components\Select::make('proxima_parcela')
                     ->hiddenOn('edit')
                     ->options([
@@ -188,6 +199,10 @@ class ContasPagarResource extends Resource
                     ->alignCenter()
                     ->color('success')
                     ->money('BRL'),
+                Tables\Columns\TextColumn::make('categoria.nome')
+                    ->alignCenter()
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\SelectColumn::make('formaPgmto')
                     ->Label('Forma de Pagamento')
                     ->disabled()
@@ -234,6 +249,7 @@ class ContasPagarResource extends Resource
                 Filter::make('Pagas')
                     ->query(fn(Builder $query): Builder => $query->where('status', true)),
                 SelectFilter::make('fornecedor')->relationship('fornecedor', 'nome'),
+                SelectFilter::make('categoria')->relationship('categoria', 'nome'),
                 Tables\Filters\Filter::make('data_vencimento')
                     ->form([
                         Forms\Components\DatePicker::make('vencimento_de')

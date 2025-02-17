@@ -22,12 +22,18 @@ class ContasPagar extends Model
         'valor_total',
         'valor_parcela',
         'valor_pago',
-        'obs'
+        'obs',
+        'categoria_id',
     ];
 
     public function fornecedor()
     {
         return $this->belongsTo(Fornecedor::class);
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class);
     }
 
     public function getActivitylogOptions(): LogOptions
