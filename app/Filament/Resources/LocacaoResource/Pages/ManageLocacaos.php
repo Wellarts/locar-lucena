@@ -38,12 +38,26 @@ class ManageLocacaos extends ManageRecords
             Actions\CreateAction::make()
                 ->label('Novo')
                 ->modalHeading('Criar Locação')
+                // ->before(function ($data, $record) {
+                //     // Se a forma de locação for semanal (2), atualiza data_retorno e qtd_diarias
+                //     if (isset($data['forma_locacao']) && $data['forma_locacao'] == 2) {
+                //         if (isset($data['qtd_semanas']) && isset($data['data_saida'])) {
+                //             $data_saida = Carbon::parse($data['data_saida']);
+                //             $data['qtd_diarias'] = $data['qtd_semanas'] * 7;
+                //             $data['data_retorno'] = $data_saida->copy()->addWeeks($data['qtd_semanas'])->toDateString();
+                //         }
+                //     }
+
+                // })
                 ->after(
                     function ($data, $record) {
                         #ALTERA O STATUS DO VEÍCULO PARA LOCADO
                         $veiculo = Veiculo::find($data['veiculo_id']);
                         $veiculo->status_locado = 1;
                         $veiculo->save();
+
+                       
+                        
 
                         #CRIA REGISTO NO FINANCEIRO
                         if ($record->status_financeiro == true and $record->status_pago_financeiro == false) {

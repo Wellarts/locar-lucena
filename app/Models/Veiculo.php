@@ -35,6 +35,7 @@ class Veiculo extends Model
         'obs',
         'documentos',
         'renavam',
+        'valor_semana',
     ];
 
     protected $casts = [

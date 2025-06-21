@@ -65,6 +65,10 @@ class VeiculoResource extends Resource
                                 ->live(onBlur: true)
                                 ->label('Valor Diária')
                                 ->numeric(),
+                            Forms\Components\TextInput::make('valor_semana')
+                                ->prefix('R$')
+                                ->label('Valor Semanal')
+                                ->numeric(),
 
                             FileUpload::make('documentos')
                                 /* ->columnSpan([

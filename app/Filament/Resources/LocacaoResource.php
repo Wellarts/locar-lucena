@@ -12,6 +12,7 @@ use App\Models\Locacao;
 use App\Models\Veiculo;
 use Carbon\Carbon;
 use DateTime;
+use FFI;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
@@ -61,262 +62,335 @@ class LocacaoResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(null)
             ->schema([
-                Fieldset::make('Dados da Locação')
-                    ->schema([
-                        Grid::make([
-                            'xl' => 4,
-                            '2xl' => 4,
-                        ])
+                Forms\Components\Tabs::make('Tabs')
+                    ->tabs([
+                        Forms\Components\Tabs\Tab::make('Informações da Locação')
                             ->schema([
-                                Forms\Components\Select::make('cliente_id')
-                                    ->label('Cliente')
-                                    ->searchable()
-                                    ->native(false)
-                                    ->columnSpan([
-                                        'xl' => 2,
-                                        '2xl' => 2,
-                                    ])
-                                    ->live()
-                                    ->required(false)
-                                    ->relationship('cliente', 'nome')
-                                    ->createOptionForm([
+                                Fieldset::make('Dados da Locação')
+                                    ->schema([
                                         Grid::make([
-                                            'xl' => 3,
-                                            '2xl' => 3,
+                                            'xl' => 4,
+                                            '2xl' => 4,
                                         ])
                                             ->schema([
-                                                Forms\Components\TextInput::make('nome')
-                                                    ->label('Nome')
+                                                Forms\Components\Select::make('cliente_id')
+                                                    ->label('Cliente')
+                                                    ->searchable()
+                                                    ->autofocus(true)
+                                                    ->extraInputAttributes(['tabindex' => 1])
+                                                    ->native(false)
                                                     ->columnSpan([
                                                         'xl' => 2,
                                                         '2xl' => 2,
                                                     ])
-                                                    ->maxLength(255),
-                                                Forms\Components\TextInput::make('cpf_cnpj')
-                                                    ->label('CPF/CNPJ')
-                                                    ->mask(RawJs::make(<<<'JS'
-                                                            $input.length > 14 ? '99.999.999/9999-99' : '999.999.999-99'
-                                                        JS))
-                                                    ->rule('cpf_ou_cnpj'),
-                                                Forms\Components\Textarea::make('endereco')
-                                                    ->label('Endereço')
-                                                    ->columnSpanFull(),
-                                                Forms\Components\Select::make('estado_id')
-                                                    ->label('Estado')
-                                                    ->native(false)
-                                                    ->searchable()
-                                                    ->required()
-                                                    ->default(33)
-                                                    ->options(Estado::all()->pluck('nome', 'id')->toArray())
-                                                    ->live(),
-                                                Forms\Components\Select::make('cidade_id')
-                                                    ->label('Cidade')
-                                                    ->default(3243)
-                                                    ->native(false)
-                                                    ->searchable()
-                                                    ->required()
-                                                    ->options(function (callable $get) {
-                                                        $estado = Estado::find($get('estado_id'));
-                                                        if (!$estado) {
-                                                            return Estado::all()->pluck('nome', 'id');
+                                                    ->live()
+                                                    ->required(false)
+                                                    ->relationship('cliente', 'nome')
+                                                    ->createOptionForm([
+                                                        Grid::make([
+                                                            'xl' => 3,
+                                                            '2xl' => 3,
+                                                        ])
+                                                            ->schema([
+                                                                Forms\Components\TextInput::make('nome')
+                                                                    ->label('Nome')
+                                                                    ->columnSpan([
+                                                                        'xl' => 2,
+                                                                        '2xl' => 2,
+                                                                    ])
+                                                                    ->maxLength(255),
+                                                                Forms\Components\TextInput::make('cpf_cnpj')
+                                                                    ->label('CPF/CNPJ')
+                                                                    ->mask(RawJs::make(<<<'JS'
+                                                                $input.length > 14 ? '99.999.999/9999-99' : '999.999.999-99'
+                                                            JS))
+                                                                    ->rule('cpf_ou_cnpj'),
+                                                                Forms\Components\Textarea::make('endereco')
+                                                                    ->label('Endereço')
+                                                                    ->columnSpanFull(),
+                                                                Forms\Components\Select::make('estado_id')
+                                                                    ->label('Estado')
+                                                                    ->native(false)
+                                                                    ->searchable()
+                                                                    ->required()
+                                                                    ->default(33)
+                                                                    ->options(Estado::all()->pluck('nome', 'id')->toArray())
+                                                                    ->live(),
+                                                                Forms\Components\Select::make('cidade_id')
+                                                                    ->label('Cidade')
+                                                                    ->default(3243)
+                                                                    ->native(false)
+                                                                    ->searchable()
+                                                                    ->required()
+                                                                    ->options(function (callable $get) {
+                                                                        $estado = Estado::find($get('estado_id'));
+                                                                        if (!$estado) {
+                                                                            return Estado::all()->pluck('nome', 'id');
+                                                                        }
+                                                                        return $estado->cidade->pluck('nome', 'id');
+                                                                    })
+                                                                    ->live(),
+                                                                Forms\Components\TextInput::make('telefone_1')
+                                                                    ->label('Telefone 1')
+                                                                    ->tel()
+                                                                    ->mask('(99)99999-9999'),
+                                                                Forms\Components\TextInput::make('telefone_2')
+                                                                    ->tel()
+                                                                    ->label('Telefone 2')
+                                                                    ->tel()
+                                                                    ->mask('(99)99999-9999'),
+                                                                Forms\Components\TextInput::make('email')
+                                                                    ->columnSpan([
+                                                                        'xl' => 2,
+                                                                        '2xl' => 2,
+                                                                    ])
+                                                                    ->email()
+                                                                    ->maxLength(255),
+                                                                Forms\Components\TextInput::make('rede_social')
+                                                                    ->label('Rede Social'),
+                                                                Forms\Components\TextInput::make('cnh')
+                                                                    ->label('CNH'),
+                                                                Forms\Components\DatePicker::make('validade_cnh')
+                                                                    ->label('Valiade da CNH'),
+                                                                Forms\Components\TextInput::make('rg')
+                                                                    ->label('RG'),
+                                                                Forms\Components\TextInput::make('exp_rg')
+                                                                    ->label('Orgão Exp.'),
+                                                                Forms\Components\Select::make('estado_exp_rg')
+                                                                    ->searchable()
+                                                                    ->label('UF - Expedidor')
+                                                                    ->options(Estado::all()->pluck('nome', 'id')->toArray()),
+                                                                FileUpload::make('img_cnh')
+                                                                    ->columnSpan([
+                                                                        'xl' => 2,
+                                                                        '2xl' => 2,
+                                                                    ])
+                                                                    ->downloadable()
+                                                                    ->label('Foto CNH'),
+                                                                Forms\Components\DatePicker::make('data_nascimento')
+                                                                    ->label('Data de Nascimento'),
+                                                            ])
+                                                    ])
+                                                    ->afterStateUpdated(function ($state) {
+                                                        if ($state != null) {
+                                                            $cliente = Cliente::find($state);
+                                                            Notification::make()
+                                                                ->title('ATENÇÃO')
+                                                                ->body('A validade da CNH do cliente selecionado: ' . Carbon::parse($cliente->validade_cnh)->format('d/m/Y'))
+                                                                ->warning()
+                                                                ->persistent()
+                                                                ->send();
                                                         }
-                                                        return $estado->cidade->pluck('nome', 'id');
+                                                    }),
+                                                Forms\Components\Select::make('veiculo_id')
+                                                    ->required(false)
+                                                    ->label('Veículo')
+                                                    ->live(onBlur: true)
+                                                    ->relationship(
+                                                        name: 'veiculo',
+                                                        modifyQueryUsing: function (Builder $query, $context) {
+                                                            if ($context === 'create') {
+                                                                $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa');
+                                                            } else {
+                                                                $query->where('status', 1)->orderBy('modelo')->orderBy('placa');
+                                                            }
+                                                        }
+                                                    )
+                                                    ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->modelo} {$record->placa}")
+                                                    ->searchable(['modelo', 'placa'])
+                                                    ->afterStateUpdated(function (Set $set, $state) {
+                                                        $veiculo = Veiculo::find($state);
+                                                        if ($state != null) {
+                                                            $set('km_saida', $veiculo->km_atual);
+                                                        }
                                                     })
-                                                    ->live(),
-                                                Forms\Components\TextInput::make('telefone_1')
-                                                    ->label('Telefone 1')
-                                                    ->tel()
-                                                    ->mask('(99)99999-9999'),
-                                                Forms\Components\TextInput::make('telefone_2')
-                                                    ->tel()
-                                                    ->label('Telefone 2')
-                                                    ->tel()
-                                                    ->mask('(99)99999-9999'),
-                                                Forms\Components\TextInput::make('email')
                                                     ->columnSpan([
                                                         'xl' => 2,
                                                         '2xl' => 2,
+                                                    ]),
+                                                Forms\Components\Radio::make('forma_locacao')
+                                                    ->label('Forma de Locação')
+                                                    ->options([
+                                                        '1' => 'Diária',
+                                                        '2' => 'Semanal',
                                                     ])
-                                                    ->email()
-                                                    ->maxLength(255),
-                                                Forms\Components\TextInput::make('rede_social')
-                                                    ->label('Rede Social'),
-                                                Forms\Components\TextInput::make('cnh')
-                                                    ->label('CNH'),
-                                                Forms\Components\DatePicker::make('validade_cnh')
-                                                    //   ->format('d/m/Y')
-                                                    ->label('Valiade da CNH'),
-                                                Forms\Components\TextInput::make('rg')
-                                                    ->label('RG'),
-                                                Forms\Components\TextInput::make('exp_rg')
-                                                    ->label('Orgão Exp.'),
-                                                Forms\Components\Select::make('estado_exp_rg')
-                                                    ->searchable()
-                                                    ->label('UF - Expedidor')
-                                                    ->options(Estado::all()->pluck('nome', 'id')->toArray()),
-                                                FileUpload::make('img_cnh')
+                                                    ->inline()
+                                                    ->inlineLabel(false)
+                                                    ->live()
+                                                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                                        if ($state == 1) {
+                                                        } else {
+                                                        }
+                                                    })
+                                                    ->default(1)
+                                                    ->required()
                                                     ->columnSpan([
                                                         'xl' => 2,
                                                         '2xl' => 2,
-                                                    ])
-                                                    ->downloadable()
-                                                    ->label('Foto CNH'),
+                                                    ]),
+                                                Forms\Components\TextInput::make('qtd_semanas')
+                                                    ->extraInputAttributes(['style' => 'font-weight: bolder; font-size: 1rem; color: #CF9A16;'])
+                                                    ->label('Qtd Semanas')
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                                        $set('data_retorno', Carbon::parse($get('data_saida'))->addWeeks($state)->format('Y-m-d'));
+                                                        $set('hora_retorno', Carbon::parse($get('hora_saida'))->format('H:i'));
+                                                        $set('qtd_diarias', Carbon::parse($get('data_saida'))->addWeeks($state)->diffInDays(Carbon::parse($get('data_saida'))));
 
-                                                Forms\Components\DatePicker::make('data_nascimento')
-                                                    ->label('Data de Nascimento'),
-
-
-
-                                            ])
-                                    ])
-                                    ->afterStateUpdated(function ($state) {
-                                        if ($state != null) {
-                                            $cliente = Cliente::find($state);
-                                            Notification::make()
-                                                ->title('ATENÇÃO')
-                                                ->body('A validade da CNH do cliente selecionado: ' . Carbon::parse($cliente->validade_cnh)->format('d/m/Y'))
-                                                ->warning()
-                                                ->persistent()
-                                                ->send();
-                                        }
-                                    }),
-
-                                Forms\Components\Select::make('veiculo_id')
-                                    ->required(false)
-                                    ->label('Veículo')
-                                    ->live(onBlur: true)
-                                    ->relationship(
-                                        name: 'veiculo',
-                                        modifyQueryUsing: function (Builder $query, $context) {
-                                            if ($context === 'create') {
-                                                $query->where('status', 1)->where('status_locado', 0)->orderBy('modelo')->orderBy('placa');
-                                            } else {
-                                                $query->where('status', 1)->orderBy('modelo')->orderBy('placa');
-                                            }
-                                        }
-
-                                    )
-                                    ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->modelo} {$record->placa}")
-                                    ->searchable(['modelo', 'placa'])
-                                    ->afterStateUpdated(function (Set $set, $state) {
-                                        $veiculo = Veiculo::find($state);
-                                        if ($state != null) {
-                                            $set('km_saida', $veiculo->km_atual);
-                                        }
-                                    })
-                                    ->columnSpan([
-                                        'xl' => 2,
-                                        '2xl' => 2,
+                                                        $carro = Veiculo::find($get('veiculo_id'));
+                                                        $set('valor_total', ($carro->valor_semana * $state));
+                                                        $set('valor_desconto', 0);
+                                                        $set('valor_total_desconto', ($carro->valor_semana * $state));
+                                                        Notification::make()
+                                                            ->title('ATENÇÃO')
+                                                            ->body(
+                                                                'Para as informações escolhida temos:<br>
+                                                        <b>' . $state . ' SEMANA(S) / ' . $get('qtd_diarias') . ' DIA(AS), e data de retorno do veículo para ' . Carbon::parse($get('data_saida'))->addWeeks($state)->format('d/m/Y') . '</b><br>
+                                                        '
+                                                            )
+                                                            ->danger()
+                                                            ->persistent()
+                                                            ->send();
+                                                    })
+                                                    ->hidden(fn(Get $get) => $get('forma_locacao') == 1)
+                                                    ->required(),
+                                            ]),
                                     ]),
-                                Forms\Components\DatePicker::make('data_saida')
-                                    ->default(Carbon::today())
-                                    ->displayFormat('d/m/Y')
-                                    ->label('Data Saída')
-                                    ->required(false),
-                                Forms\Components\TimePicker::make('hora_saida')
-                                    ->seconds(false)
-                                    ->default(Carbon::now())
-                                    ->label('Hora Saída')
-                                    ->required(false),
-                                Forms\Components\DatePicker::make('data_retorno')
-                                    ->displayFormat('d/m/Y')
-                                    ->label('Data Retorno')
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
-                                        $dt_saida = Carbon::parse($get('data_saida'));
-                                        $dt_retorno = Carbon::parse($get('data_retorno'));
-                                        $qtd_dias = $dt_retorno->diffInDays($dt_saida);
-                                        $set('qtd_diarias', $qtd_dias);
+                                Fieldset::make('Datas e Valores')
+                                    ->schema([
+                                        Grid::make([
+                                            'xl' => 4,
+                                            '2xl' => 4,
+                                        ])
+                                            ->schema([
 
-                                        $carro = Veiculo::find($get('veiculo_id'));
-                                        $set('valor_total', ($carro->valor_diaria * $qtd_dias));
-                                        $set('valor_desconto', 0);
-                                        $set('valor_total_desconto', ($carro->valor_diaria * $qtd_dias));
+                                                Forms\Components\DatePicker::make('data_saida')
+                                                    ->default(Carbon::today())
+                                                    ->displayFormat('d/m/Y')
+                                                    ->label('Data Saída')
+                                                    ->required(false),
 
-                                        ### CALCULO DOS DIAS E SEMANAS
-                                        $diferencaEmDias = $dt_saida->diffInDays($dt_retorno);
-                                        // Calculando a diferença em semanas
-                                        $diferencaEmSemanas = $diferencaEmDias / 7;
+                                                Forms\Components\TimePicker::make('hora_saida')
+                                                    ->seconds(false)
+                                                    ->default(Carbon::now())
+                                                    ->label('Hora Saída')
+                                                    ->required(false),
+                                                Forms\Components\DatePicker::make('data_retorno')
+                                                    ->displayFormat('d/m/Y')
+                                                    ->label('Data Retorno')
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                                        $dt_saida = Carbon::parse($get('data_saida'));
+                                                        $dt_retorno = Carbon::parse($get('data_retorno'));
+                                                        $qtd_dias = $dt_retorno->diffInDays($dt_saida);
+                                                        $set('qtd_diarias', $qtd_dias);
 
-                                        // Arredondando para baixo para obter o número inteiro de semanas
-                                        $semanasCompletas = floor($diferencaEmSemanas);
-                                        // Calculando os dias restantes (módulo 7)
-                                        $diasRestantes = $diferencaEmDias % 7;
-                                        //Calculando os meses
-                                        $mesesCompleto = $diferencaEmDias / 30;
-                                        //Calculando os meses em número inteiro
-                                        $mesesCompleto = floor($mesesCompleto);
-                                        //Calculando semanas restantes
-                                        $diasRestantesMeses = $diferencaEmDias % 30;
+                                                        $carro = Veiculo::find($get('veiculo_id'));
+                                                        $set('valor_total', ($carro->valor_diaria * $qtd_dias));
+                                                        $set('valor_desconto', 0);
+                                                        $set('valor_total_desconto', ($carro->valor_diaria * $qtd_dias));
 
-                                        Notification::make()
-                                            ->title('ATENÇÃO')
-                                            ->body(
-                                                'Para as datas escolhida temos:<br>
-                                                <b>' . $qtd_dias . ' DIA(AS).</b><br>
-                                                <b>' . $semanasCompletas . ' SEMANA(AS) e ' . $diasRestantes . ' DIA(AS). </b> <br>
-                                                <b>' . $mesesCompleto . ' MÊS/MESES  e ' . $diasRestantesMeses . ' DIA(AS).</b><br>
-                                            '
-                                            )
-                                            ->danger()
-                                            ->persistent()
-                                            ->send();
-                                    })
-                                    ->required(false),
-                                Forms\Components\TimePicker::make('hora_retorno')
-                                    ->seconds(false)
-                                    ->default(Carbon::now())
-                                    ->label('Hora Retorno')
-                                    ->required(false),
-                                Forms\Components\TextInput::make('km_saida')
-                                    ->label('Km Saída')
-                                    ->required(false),
-                                Forms\Components\TextInput::make('km_retorno')
-                                    ->label('Km Retorno'),
+                                                        ### CALCULO DOS DIAS E SEMANAS
+                                                        $diferencaEmDias = $dt_saida->diffInDays($dt_retorno);
+                                                        // Calculando a diferença em semanas
+                                                        $diferencaEmSemanas = $diferencaEmDias / 7;
 
-                            ]),
-                        Fieldset::make('Valores')
-                            ->schema([
+                                                        // Arredondando para baixo para obter o número inteiro de semanas
+                                                        $semanasCompletas = floor($diferencaEmSemanas);
+                                                        // Calculando os dias restantes (módulo 7)
+                                                        $diasRestantes = $diferencaEmDias % 7;
+                                                        //Calculando os meses
+                                                        $mesesCompleto = $diferencaEmDias / 30;
+                                                        //Calculando os meses em número inteiro
+                                                        $mesesCompleto = floor($mesesCompleto);
+                                                        //Calculando semanas restantes
+                                                        $diasRestantesMeses = $diferencaEmDias % 30;
 
-                                Forms\Components\TextInput::make('qtd_diarias')
-                                    ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #CF9A16;'])
-                                    ->label('Qtd Diárias')
-                                    ->readOnly()
-                                    ->required(false),
-                                Forms\Components\TextInput::make('valor_total')
-                                    ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #D33644;'])
-                                    ->label('Valor Total')
-                                    ->prefix('R$')
-                                    ->inputMode('decimal')
-                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
-                                    ->readOnly()
-                                    ->required(false),
-                                Forms\Components\TextInput::make('valor_desconto')
-                                    ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #3668D3;'])
-                                    ->label('Desconto')
-                                    ->numeric()
-                                    ->prefix('R$')
-                                    ->inputMode('decimal')
-                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
-                                    ->required(true)
-                                    ->live(onBlur: true)
-                                    ->afterStateUpdated(function ($state, callable $set, Get $get,) {
-                                        $set('valor_total_desconto', ((float)$get('valor_total') - (float)$get('valor_desconto')));
-                                    }),
-                                Forms\Components\TextInput::make('valor_total_desconto')
-                                    ->extraInputAttributes(['tabindex' => 1, 'style' => 'font-weight: bolder; font-size: 1rem; color: #17863E;'])
-                                    ->label('Valor Total com Desconto')
-                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
-                                    ->numeric()
-                                    ->prefix('R$')
-                                    ->inputMode('decimal')
-                                    ->readOnly()
-                                    ->required(false),
-                                Forms\Components\Textarea::make('obs')
-                                    ->autosize()
-                                    ->columnSpanFull()
-                                    ->label('Observações'),
+                                                        Notification::make()
+                                                            ->title('ATENÇÃO')
+                                                            ->body(
+                                                                'Para as datas escolhida temos:<br>
+                                                            <b>' . $qtd_dias . ' DIA(AS).</b><br>
+                                                            <b>' . $semanasCompletas . ' SEMANA(AS) e ' . $diasRestantes . ' DIA(AS). </b> <br>
+                                                            <b>' . $mesesCompleto . ' MÊS/MESES  e ' . $diasRestantesMeses . ' DIA(AS).</b><br>
+                                                        '
+                                                            )
+                                                            ->danger()
+                                                            ->persistent()
+                                                            ->send();
+                                                    })
+                                                    // ->hidden(fn(Get $get) => $get('forma_locacao') == 2)
+                                                    ->required(false),
+                                                Forms\Components\TimePicker::make('hora_retorno')
+                                                    ->seconds(false)
+                                                    ->default(Carbon::now())
+                                                    ->label('Hora Retorno')
+                                                    // ->hidden(fn(Get $get) => $get('forma_locacao') == 2)
+                                                    ->required(false),
+                                                Forms\Components\TextInput::make('km_saida')
+                                                    ->label('Km Saída')
+                                                    ->required(false),
+                                                Forms\Components\TextInput::make('km_retorno')
+                                                    ->hidden(fn($context) => $context === 'create')
+                                                    ->label('Km Retorno'),
+                                                Forms\Components\TextInput::make('valor_caucao')
+                                                    ->label('Valor Caução')
+                                                    ->hint('Caso exista, registre o valor do caução')
+                                                    ->columnSpan([
+                                                        'xl' => 2,
+                                                        '2xl' => 2,
+                                                    ])
+                                                    ->numeric()
+                                                    ->prefix('R$')
+                                                    ->inputMode('decimal')
+                                                    ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2),
+
+                                            ]),
+                                        Forms\Components\TextInput::make('qtd_diarias')
+                                            ->extraInputAttributes(['style' => 'font-weight: bolder; font-size: 1rem; color: #CF9A16;'])
+                                            ->label('Qtd Diárias')
+                                            ->readOnly()
+                                            // ->hidden(fn(Get $get) => $get('forma_locacao') == 2)
+                                            ->required(false),
+
+                                        Forms\Components\TextInput::make('valor_total')
+                                            ->extraInputAttributes(['style' => 'font-weight: bolder; font-size: 1rem; color: #D33644;'])
+                                            ->label('Valor Total')
+                                            ->prefix('R$')
+                                            ->inputMode('decimal')
+                                            ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
+                                            ->readOnly()
+                                            ->required(false),
+                                        Forms\Components\TextInput::make('valor_desconto')
+                                            ->extraInputAttributes(['style' => 'font-weight: bolder; font-size: 1rem; color: #3668D3;'])
+                                            ->label('Desconto')
+                                            ->numeric()
+                                            ->prefix('R$')
+                                            ->inputMode('decimal')
+                                            ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
+                                            ->required(true)
+                                            ->live(onBlur: true)
+                                            ->afterStateUpdated(function ($state, callable $set, Get $get,) {
+                                                $set('valor_total_desconto', ((float)$get('valor_total') - (float)$get('valor_desconto')));
+                                            }),
+                                        Forms\Components\TextInput::make('valor_total_desconto')
+                                            ->extraInputAttributes(['style' => 'font-weight: bolder; font-size: 1rem; color: #17863E;'])
+                                            ->label('Valor Total com Desconto')
+                                            ->currencyMask(thousandSeparator: '.', decimalSeparator: ',', precision: 2)
+                                            ->numeric()
+                                            ->prefix('R$')
+                                            ->inputMode('decimal')
+                                            ->readOnly()
+                                            ->required(false),
+                                        Forms\Components\Textarea::make('obs')
+                                            ->autosize()
+                                            ->columnSpanFull()
+                                            ->label('Observações'),
+                                    ]),
                                 Fieldset::make('Financeiro')
                                     ->schema([
                                         Grid::make([
@@ -360,8 +434,6 @@ class LocacaoResource extends Resource
                                                                 $set('formaPgmto_financeiro', '');
                                                             }
                                                         }
-
-
                                                     )
                                                     ->label('Recebido'),
                                                 Forms\Components\Select::make('proxima_parcela')
@@ -425,70 +497,98 @@ class LocacaoResource extends Resource
                                                     ->label('Valor Total')
                                                     ->readOnly()
                                                     ->required(false),
+                                            ]),
+                                    ]),
+                                Fieldset::make('Controle da Locação')
+                                    ->schema([
+                                        ToggleButtons::make('status')
+                                            ->options([
+                                                '0' => 'Locado',
+                                                '1' => 'Finalizar',
+
                                             ])
+                                            ->colors([
+                                                '0' => 'danger',
+                                                '1' => 'success',
+                                            ])
+                                            ->inline()
+                                            ->default(0)
+                                            ->label(''),
+                                    ])
+
+                            ]),
+
+                        Forms\Components\Tabs\Tab::make('Assinaturas de Terceiros')
+                            ->schema([
+                                Fieldset::make('Assinaturas no Contrato')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('testemunha_1')
+                                            ->label('Testemunha 1')
+                                            ->required(false),
+                                        Forms\Components\TextInput::make('testemunha_1_rg')
+                                            ->label('RG'),
+                                        Forms\Components\TextInput::make('testemunha_2')
+                                            ->label('Testemunha 2')
+                                            ->required(false),
+                                        Forms\Components\TextInput::make('testemunha_2_rg')
+                                            ->label('RG'),
+                                        Forms\Components\TextInput::make('fiador')
+                                            ->label('Fiador')
+                                            ->required(false),
+                                            
+                                    ]),
+
+                                Fieldset::make('Dados Completo do Fiador')
+                                    ->schema([
+                                        Forms\Components\Textarea::make('dados_fiador')
+                                            ->label('')
+                                            ->autosize()
+                                            ->columnSpanFull(),
 
 
                                     ]),
-
                             ]),
-                    ]),
 
-                Fieldset::make('Ocorrências da Locação')
-                    ->schema([
-                        Repeater::make('ocorrencia')
-                            ->label('Ocorrências')
+
+
+                        Forms\Components\Tabs\Tab::make('Ocorrências')
                             ->schema([
-                                Grid::make([
-                                    'xl' => 3,
-                                    '2xl' => 3,
-                                ])
+                                Fieldset::make('Ocorrências da Locação')
                                     ->schema([
-                                        Select::make('tipo')
-                                            ->options([
-                                                'multa' => 'Multa',
-                                                'colisao' => 'Colisão',
-                                                'avaria' => 'Avaria',
-                                                'danos_terceiros' => 'Danos a Terceiros',
-                                                'outro' => 'Outros',
-                                            ]),
-
-                                        DateTimePicker::make('data_hora'),
-                                        TextInput::make('valor'),
-                                        Textarea::make('descricao')
-                                            ->columnSpan(2)
-                                            ->autosize()
-                                            ->label('Descrição'),
-
-                                        ToggleButtons::make('status')
-                                            ->label('Concluído?')
-                                            ->default(false)
-                                            ->boolean()
-                                            ->grouped()
-
-
-                                    ])
-                            ])
-                            ->columnSpanFull()
-                            ->addActionLabel('Novo')
-                    ]),
-                Fieldset::make('Controle da Locação')
-                    ->schema([
-                        ToggleButtons::make('status')
-                            ->options([
-                                '0' => 'Locado',
-                                '1' => 'Finalizar',
-
-                            ])
-                            ->colors([
-                                '0' => 'danger',
-                                '1' => 'success',
-                            ])
-                            ->inline()
-                            ->default(0)
-                            ->label(''),
+                                        Repeater::make('ocorrencia')
+                                            ->label('Ocorrências')
+                                            ->schema([
+                                                Grid::make([
+                                                    'xl' => 3,
+                                                    '2xl' => 3,
+                                                ])
+                                                    ->schema([
+                                                        Select::make('tipo')
+                                                            ->options([
+                                                                'multa' => 'Multa',
+                                                                'colisao' => 'Colisão',
+                                                                'avaria' => 'Avaria',
+                                                                'danos_terceiros' => 'Danos a Terceiros',
+                                                                'outro' => 'Outros',
+                                                            ]),
+                                                        DateTimePicker::make('data_hora'),
+                                                        TextInput::make('valor'),
+                                                        Textarea::make('descricao')
+                                                            ->columnSpan(2)
+                                                            ->autosize()
+                                                            ->label('Descrição'),
+                                                        ToggleButtons::make('status')
+                                                            ->label('Concluído?')
+                                                            ->default(false)
+                                                            ->boolean()
+                                                            ->grouped()
+                                                    ])
+                                            ])
+                                            ->columnSpanFull()
+                                            ->addActionLabel('Novo')
+                                    ]),
+                            ]),
                     ])
-
-
             ]);
     }
 
@@ -623,7 +723,12 @@ class LocacaoResource extends Resource
             ->actions([
                 Tables\Actions\Action::make('Imprimir')
                     ->url(fn(Locacao $record): string => route('imprimirLocacao', $record))
+                    ->label('Contrato 1')
                     ->openUrlInNewTab(),
+                // Tables\Actions\Action::make('Imprimir')
+                //     ->url(fn(Locacao $record): string => route('imprimirLocacao2', $record))
+                //     ->label('Contrato 2')
+                //     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make()
                     ->modalHeading('Editar locação')
                     ->after(function ($data) {
@@ -634,17 +739,16 @@ class LocacaoResource extends Resource
                             $veiculo->save();
                         }
                     }),
-                    Tables\Actions\DeleteAction::make()
+                Tables\Actions\DeleteAction::make()
                     ->before(function ($record) {
-                            $veiculo = Veiculo::find($record->veiculo_id);
-                            $veiculo->status_locado = 0;
-                            $veiculo->save();
-                        
+                        $veiculo = Veiculo::find($record->veiculo_id);
+                        $veiculo->status_locado = 0;
+                        $veiculo->save();
                     }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                  //  Tables\Actions\DeleteBulkAction::make(),
+                    //  Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

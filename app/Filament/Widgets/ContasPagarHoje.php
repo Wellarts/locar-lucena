@@ -12,7 +12,7 @@ class ContasPagarHoje extends BaseWidget
 {
   //  protected int | string | array $columnSpan = 'full';
 
-    protected static ?string $heading = 'Para Pagar Hoje';
+    protected static ?string $heading = 'Para Pagar Hoje/Vencidas';
 
     protected static ?int $sort = 7;
 
@@ -24,7 +24,8 @@ class ContasPagarHoje extends BaseWidget
 
         return $table
             ->query(
-                ContasPagar::query()->where('status', 0)->whereYear('data_vencimento', $ano)->whereMonth('data_vencimento', $mes)->whereDay('data_vencimento', $dia)
+                ContasPagar::query()->where('status', 0)
+                    ->whereDate('data_vencimento', '<=', now()->toDateString())
             )
             ->columns([
                 Tables\Columns\TextColumn::make('fornecedor.nome')
@@ -67,5 +68,13 @@ class ContasPagarHoje extends BaseWidget
                 ->money('BRL'),
 
             ]);
+            // Table\Actions\ActionGroup::make([
+            //     Tables\Actions\EditAction::make(),
+            //     Tables\Actions\Action::make('ir_contas_receber')
+            //         ->label('Quitar Parcela')
+            //         ->icon('heroicon-o-arrow-right')
+            //         ->url(fn ($record) => route('filament.admin.resources.contas-receber.edit', ['record' => $record->id]))
+            //         ->openUrlInNewTab(),                
+            // ]);
     }
 }
