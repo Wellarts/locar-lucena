@@ -43,7 +43,7 @@ class ContasReceberHoje extends BaseWidget
                 ->alignCenter()
                 ->badge()
                 ->color('danger')
-                ->date(),
+                ->date('d/m/Y'),
           
 
 

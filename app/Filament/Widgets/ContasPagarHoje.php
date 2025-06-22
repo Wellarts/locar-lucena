@@ -40,7 +40,7 @@ class ContasPagarHoje extends BaseWidget
                 ->alignCenter()
                 ->badge()
                 ->color('danger')
-                ->date(),
+                ->date('d/m/Y'),
          /*   Tables\Columns\TextColumn::make('valor_total')
                 ->label('Valor Total')
                 ->alignCenter()
