@@ -164,7 +164,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a receber com vencimento próximo.')
                     ->body('Do cliente <b>' . $cr->cliente->nome. '</b> no valor de R$ <b>' . $cr->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cr->data_vencimento)->format('d/m/Y').'</b>.')
                     ->success()
-                    //->persistent()
+                    ->persistent()
                     ->send();
 
 
@@ -174,7 +174,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a receber com vencimento para hoje.')
                     ->body('Do cliente <b>' . $cr->cliente->nome. '</b> no valor de R$ <b>' . $cr->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cr->data_vencimento)->format('d/m/Y').'</b>.')
                     ->warning()
-                    //->persistent()
+                    ->persistent()
                     ->send();
 
 
@@ -184,7 +184,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a receber vencida.')
                     ->body('Do cliente <b>' . $cr->cliente->nome. '</b> no valor de R$ <b>' . $cr->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cr->data_vencimento)->format('d/m/Y').'</b>.')
                     ->danger()
-                    //->persistent()
+                    ->persistent()
                     ->send();
 
 
@@ -204,7 +204,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a pagar com vencimento próximo.')
                     ->body('Do fornecedor <b>' . $cp->fornecedor->nome. '</b> no valor de R$ <b>' . $cp->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cp->data_vencimento)->format('d/m/Y').'</b>.')
                     ->success()
-                    //->persistent()
+                    ->persistent()
                     ->send();
 
 
@@ -214,7 +214,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a pagar com vencimento para hoje.')
                     ->body('Do fornecedor <b>' . $cp->fornecedor->nome. '</b> no valor de R$ <b>' . $cp->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cp->data_vencimento)->format('d/m/Y').'</b>.')
                     ->warning()
-                    //->persistent()
+                    ->persistent()
                     ->send();
 
 
@@ -224,7 +224,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                     ->title('ATENÇÃO: Conta a pagar vencida.')
                     ->body('Do fornecedor <b>' . $cp->fornecedor->nome. '</b> no valor de R$ <b>' . $cp->valor_parcela . '</b> com vencimento em <b>'.carbon::parse($cp->data_vencimento)->format('d/m/Y').'</b>.')
                     ->danger()
-                    //->persistent()
+                    ->persistent()
                     ->send();
 
 
