@@ -118,7 +118,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca de óleo próxima. Faltam ' . $veiculo->prox_troca_oleo - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        //->persistent()
+                        ->persistent()
                         ->send();
                 }
 
@@ -127,7 +127,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca do filtro próxima.  Faltam ' . $veiculo->prox_troca_filtro - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        //->persistent()
+                        ->persistent()
                         ->send();
                 }
 
@@ -136,7 +136,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca da correia próxima.  Faltam ' . $veiculo->prox_troca_correia - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        //->persistent()
+                        ->persistent()
                         ->send();
                 }
 
@@ -145,7 +145,7 @@ class Dashboard extends \Filament\Pages\Dashboard
                         ->title('ATENÇÃO: Veículos com troca da pastilha próxima.  Faltam ' . $veiculo->prox_troca_pastilha - $veiculo->km_atual . ' Km.')
                         ->body('Veiculo: ' . $veiculo->modelo . ' Placa: ' . $veiculo->placa)
                         ->danger()
-                        //->persistent()
+                        ->persistent()
                         ->send();
                 }
             }
