@@ -100,12 +100,17 @@ class CustoVeiculoResource extends Resource
             ])
             ->columns([
                 Tables\Columns\TextColumn::make('fornecedor.nome')
+                    ->label('Fornecedor')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('veiculo.modelo')
-                    ->sortable()
-                    ->label('Veículo'),
+                    ->label('Veículo')
+                    ->searchable()
+                    ->sortable(),                    
                 Tables\Columns\TextColumn::make('veiculo.placa')
-                    ->label('Placa'),
+                    ->label('Placa')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('categoria.nome')
                     ->label('Categoria')
                     ->sortable()
