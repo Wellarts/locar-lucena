@@ -628,7 +628,7 @@ class LocacaoResource extends Resource
                     ->date('d/m/Y'),
                 Tables\Columns\TextColumn::make('hora_saida')
                     ->alignCenter()
-                    ->date('H:m')
+                    ->date('H:i')
                     ->sortable()
                     ->label('Hora Saída'),
                 Tables\Columns\TextColumn::make('data_retorno')
@@ -654,7 +654,7 @@ class LocacaoResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('hora_retorno')
                     ->alignCenter()
-                    ->date('H:m')
+                    ->date('H:i')
                     ->label('Hora Retorno'),
                 Tables\Columns\TextColumn::make('Km_Percorrido')
                     ->label('Km Total')
