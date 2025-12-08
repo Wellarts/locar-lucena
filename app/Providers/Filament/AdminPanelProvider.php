@@ -41,8 +41,8 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
            // ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth(MaxWidth::Full)
-            ->favicon(asset('img/logo-lucena.png'))
-            ->brandLogo(asset('img/logo-lucena.png'))
+            ->favicon(asset('img/logo.png'))
+            ->brandLogo(asset('img/logo.png'))
             ->brandLogoHeight('3rem')
             ->colors([
                 'primary' => Color::Amber,

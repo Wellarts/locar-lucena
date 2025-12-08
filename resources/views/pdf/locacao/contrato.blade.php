@@ -55,7 +55,7 @@
 
 <table style="width: 100%">
   <tr>
-    <td><img src="{{ asset('img/logo-lucena.png') }}" alt="Image" height="60" width="180"></td>
+    <td><img src="{{ asset('img/logo.png') }}" alt="Image" height="60" width="180"></td>
     <td> <p style="width: 100%; font-size:28px; font-weight: bold;" align="center">Locadora Lucena</p>
          <p style="font-size:16px;" align="center">Av. Agamenon Magalhães, nº 160c Centro - Lajedo - PE.<br>
                                                   Contato: (87)9-9608-0251 (87)9-9602-9051<br>
