@@ -2,43 +2,51 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\CustoVeiculo;
-use App\Models\Locacao;
+use App\Models\Veiculo;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
 class TotalLucratividade extends BaseWidget
 {
-    protected static ?int $sort = 5;
+    protected static ?string $pollingInterval = '30s';
 
     protected function getStats(): array
     {
-        // Cache curto para reduzir carga do BD em acessos frequentes
-        $totals = Cache::remember('filament.total_lucratividade', 60, function () {
-            $locacoes = (float) Locacao::sum('valor_total_desconto');
-            $despesas = (float) CustoVeiculo::sum('valor');
-
-            return [
-                'locacoes' => $locacoes,
-                'despesas' => $despesas,
-                'lucro' => $locacoes - $despesas,
-            ];
+        $totais = Cache::remember('dashboard_lucratividade', 300, function () {
+            return DB::table('veiculos as v')
+                ->select([
+                    DB::raw('COUNT(DISTINCT v.id) as total_veiculos'),
+                    DB::raw('COALESCE(SUM(l.valor_total_desconto), 0) as total_locacoes'),
+                    DB::raw('COALESCE(SUM(cv.valor), 0) as total_custos'),
+                    DB::raw('COALESCE(SUM(l.valor_total_desconto), 0) - COALESCE(SUM(cv.valor), 0) as lucro_total')
+                ])
+                ->leftJoin('locacaos as l', 'v.id', '=', 'l.veiculo_id')
+                ->leftJoin('custo_veiculos as cv', 'v.id', '=', 'cv.veiculo_id')
+                ->first();
         });
 
         return [
-            Stat::make('Locações', number_format($totals['locacoes'], 2, ",", "."))
-                ->description('Total de Locações')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('warning'),
-            Stat::make('Manutenções/Despesas', number_format($totals['despesas'], 2, ",", "."))
-                ->description('Total de Manutenções/Despesas')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('danger'),
-            Stat::make('Locações - Manutenções', number_format($totals['lucro'], 2, ",", "."))
-                ->description('Lucratividade')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+            Stat::make('Veículos Ativos', $totais->total_veiculos)
+                ->description('Total cadastrados')
+                ->icon('heroicon-o-truck')
+                ->color('primary'),
+            
+            Stat::make('Faturamento Total', number_format($totais->total_locacoes, 2, ',', '.'))
+                ->description('Com locações')
+                ->icon('heroicon-o-currency-dollar')
                 ->color('success'),
+            
+            Stat::make('Custos Totais', number_format($totais->total_custos, 2, ',', '.'))
+                ->description('Manutenções e despesas')
+                ->icon('heroicon-o-wrench-screwdriver')
+                ->color('danger'),
+            
+            Stat::make('Lucro Líquido', number_format($totais->lucro_total, 2, ',', '.'))
+                ->description('Faturamento - Custos')
+                ->icon('heroicon-o-chart-bar')
+                ->color($totais->lucro_total >= 0 ? 'success' : 'danger'),
         ];
     }
 }

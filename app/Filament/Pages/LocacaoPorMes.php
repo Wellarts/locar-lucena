@@ -20,7 +20,6 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class LocacaoPorMes extends Page implements HasTable
 {
-    #teste
     use InteractsWithTable;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
@@ -32,95 +31,110 @@ class LocacaoPorMes extends Page implements HasTable
     protected static ?string $title = 'Faturamento Mensal';
 
     public static function shouldRegisterNavigation(): bool
-        {
-            return true;
+    {
+        return true;
+    }
+
+    public function mount()
+    {
+        // Não recria todo o temp se já houver dados.
+        if (Temp_lucratividade::exists()) {
+            return;
         }
 
-        public function mount()
-        {
-            Temp_lucratividade::truncate();
+        Temp_lucratividade::truncate();
 
-            $Locacoes = Locacao::all();
+        $batchSize = 500; // tamanho do lote de inserts
+        $insertBatch = [];
 
-            foreach($Locacoes as $Locacao){
+        // Seleciona apenas campos necessários e processa em chunks
+        Locacao::select(['id','cliente_id','veiculo_id','valor_total_desconto','qtd_diarias','data_saida'])
+            ->chunk(200, function ($locacoes) use (&$insertBatch, $batchSize) {
+                foreach ($locacoes as $locacao) {
+                    $qtd = (int) $locacao->qtd_diarias;
+                    if ($qtd <= 0) {
+                        continue;
+                    }
 
-                $valorLocacaoDia = ($Locacao->valor_total_desconto / $Locacao->qtd_diarias);
+                    $valorLocacaoDia = $locacao->valor_total_desconto / $qtd;
+                    $startDate = Carbon::parse($locacao->data_saida);
 
-               // dd($valorLocacaoDia);
-                $dataDiarias = Carbon::create($Locacao->data_saida)->addDay(1);
-                    for($x=1;$x<=$Locacao->qtd_diarias;$x++){
+                    for ($i = 0; $i < $qtd; $i++) {
+                        $dataDiaria = $startDate->copy()->addDays($i);
 
-                        $addLocacaoDia = [
-                            'cliente_id'  => $Locacao->cliente_id,
-                            'veiculo_id'  => $Locacao->veiculo_id,
-                            'data_saida'  => $dataDiarias,
-                            'qtd_diaria'  => 1,
-                            'valor_diaria'  => $valorLocacaoDia,
+                        $insertBatch[] = [
+                            'cliente_id'   => $locacao->cliente_id,
+                            'veiculo_id'   => $locacao->veiculo_id,
+                            'data_saida'   => $dataDiaria->format('Y-m-d H:i:s'),
+                            'qtd_diaria'   => 1,
+                            'valor_diaria' => $valorLocacaoDia,
+                            'created_at'   => now(),
+                            'updated_at'   => now(),
                         ];
 
-                        Temp_lucratividade::create($addLocacaoDia);
-                        $dataDiarias = Carbon::create($dataDiarias)->addDay(1);
+                        if (count($insertBatch) >= $batchSize) {
+                            Temp_lucratividade::insert($insertBatch);
+                            $insertBatch = [];
+                        }
                     }
-            }
+                }
+            });
 
-
+        if (!empty($insertBatch)) {
+            Temp_lucratividade::insert($insertBatch);
         }
+    }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(Temp_lucratividade::query())
+            ->query(Temp_lucratividade::with(['cliente', 'veiculo']))
             ->description('Esta consulta divide as locações pela quantidade de diárias e coloca cada diária da locação
         na data dos dias em sequência a partir da data da saída, assim teremos o valor da diária por data da utilização do véiculo.')
-          //  ->defaultGroup('data_venda','year')
             ->columns([
-                            TextColumn::make('cliente.nome')
-                                ->sortable()
-                                ->searchable(),
-                            TextColumn::make('veiculo.modelo')
-                                ->sortable()
-                                ->searchable()
-                                ->label('Veículo'),
-                            TextColumn::make('veiculo.placa')
-                                ->searchable()
-                                 ->label('Placa'),
-                            TextColumn::make('data_saida')
-                                ->label('Data Saída')
-                                ->date('d/m/Y')
-                                ->sortable()
-                                ->alignCenter(),
-                            TextColumn::make('qtd_diaria')
-                                ->Summarize(Count::make('qtd_diaria')->label('Total de Diárias'))
-                                ->alignCenter()
-                                ->label('Qtd Diárias'),
-                            TextColumn::make('valor_diaria')
-                                ->summarize(Sum::make()->money('BRL')->label('Total'))
-                                ->money('BRL')
-                                ->label('Valor Total'),
-
-
+                TextColumn::make('cliente.nome')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('veiculo.modelo')
+                    ->sortable()
+                    ->searchable()
+                    ->label('Veículo'),
+                TextColumn::make('veiculo.placa')
+                    ->searchable()
+                    ->label('Placa'),
+                TextColumn::make('data_saida')
+                    ->label('Data Saída')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->alignCenter(),
+                TextColumn::make('qtd_diaria')
+                    ->Summarize(Count::make('qtd_diaria')->label('Total de Diárias'))
+                    ->alignCenter()
+                    ->label('Qtd Diárias'),
+                TextColumn::make('valor_diaria')
+                    ->summarize(Sum::make()->money('BRL')->label('Total'))
+                    ->money('BRL')
+                    ->label('Valor Total'),
             ])
             ->filters([
                 SelectFilter::make('cliente')->searchable()->relationship('cliente', 'nome'),
                 SelectFilter::make('veiculo')->searchable()->relationship('veiculo', 'placa'),
                 Tables\Filters\Filter::make('datas')
-                   ->form([
-                       DatePicker::make('data_saida_de')
-                           ->label('Saída de:'),
-                       DatePicker::make('data_saida_ate')
-                           ->label('Saída ate:'),
-                   ])
-                   ->query(function ($query, array $data) {
-                       return $query
-                           ->when($data['data_saida_de'],
-                               fn($query) => $query->whereDate('data_saida', '>=', $data['data_saida_de']))
-                           ->when($data['data_saida_ate'],
-                               fn($query) => $query->whereDate('data_saida', '<=', $data['data_saida_ate']));
-                  })
-
-                ])
+                    ->form([
+                        DatePicker::make('data_saida_de')
+                            ->label('Saída de:'),
+                        DatePicker::make('data_saida_ate')
+                            ->label('Saída ate:'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['data_saida_de'],
+                                fn($query) => $query->whereDate('data_saida', '>=', $data['data_saida_de']))
+                            ->when($data['data_saida_ate'],
+                                fn($query) => $query->whereDate('data_saida', '<=', $data['data_saida_ate']));
+                    })
+            ])
             ->bulkActions([
-
                 ExportBulkAction::make(),
             ]);
     }

@@ -11,59 +11,55 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class ContasReceberHoje extends BaseWidget
 {
-
-  //  protected int | string | array $columnSpan = 'full';
-
     protected static ?string $heading = 'Para Receber Hoje/Vencidas';
 
     protected static ?int $sort = 6;
 
     public function table(Table $table): Table
     {
-        $ano = date('Y');
-        $mes = date('m');
-        $dia = date('d');
-
         return $table
             ->query(
                 ContasReceber::query()
                     ->where('status', 0)
                     ->whereDate('data_vencimento', '<=', now()->toDateString())
+                    ->with([
+                        'cliente' => function ($q) {
+                            $q->select('id', 'nome');
+                        },
+                    ])
+                    ->select([
+                        'id',
+                        'cliente_id',
+                        'ordem_parcela',
+                        'data_vencimento',
+                        'valor_parcela',
+                    ])
+                    ->orderBy('data_vencimento', 'asc')
             )
             ->columns([
                 Tables\Columns\TextColumn::make('cliente.nome')
-                ->sortable(),
+                    ->label('Cliente')
+                    ->sortable(),
 
-            Tables\Columns\TextColumn::make('ordem_parcela')
-                ->alignCenter()
-                ->label('Parcela Nº'),
-            Tables\Columns\TextColumn::make('data_vencimento')
-                ->label('Vencimento')
-                ->sortable()
-                ->alignCenter()
-                ->badge()
-                ->color('danger')
-                ->date('d/m/Y'),
-          
+                Tables\Columns\TextColumn::make('ordem_parcela')
+                    ->alignCenter()
+                    ->label('Parcela Nº'),
 
+                Tables\Columns\TextColumn::make('data_vencimento')
+                    ->label('Vencimento')
+                    ->sortable()
+                    ->alignCenter()
+                    ->badge()
+                    ->color('danger')
+                    ->date('d/m/Y'),
 
-            Tables\Columns\TextColumn::make('valor_parcela')
-                ->label('Valor Parcela')
-                ->summarize(Sum::make()->money('BRL')->label('Total'))
-                ->alignCenter()
-                ->badge()
-                ->color('danger')
-                ->money('BRL'),
-
+                Tables\Columns\TextColumn::make('valor_parcela')
+                    ->label('Valor Parcela')
+                    ->summarize(Sum::make()->money('BRL')->label('Total'))
+                    ->alignCenter()
+                    ->badge()
+                    ->color('danger')
+                    ->money('BRL'),
             ]);
-            // ->actions([
-                                  
-            //         Action::make('ir_contas_receber')
-            //             ->label('Quitar Parcela')
-            //             ->icon('heroicon-o-arrow-right')
-            //             ->url(fn ($record) => route('filament.admin.resources.contas-receber.edit', ['record' => $record->id]))
-            //             ->openUrlInNewTab(), 
-            // ]);
-            
     }
 }

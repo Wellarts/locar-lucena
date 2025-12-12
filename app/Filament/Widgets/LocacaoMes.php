@@ -15,14 +15,18 @@ class LocacaoMes extends ChartWidget
 
     protected function getData(): array
     {
-        $data = Trend::model(Locacao::class)
-        ->dateColumn('data_saida')
-        ->between(
-            start: now()->startOfYear(),
-            end: now()->endOfYear(),
-        )
-        ->perMonth()
-        ->sum('valor_total_desconto');
+        // Cache os dados por um período específico, se necessário
+        $cacheKey = 'locacoes_por_mes_' . now()->format('Y');
+        $data = cache()->remember($cacheKey, 60 * 60, function () {
+            return Trend::model(Locacao::class)
+                ->dateColumn('data_saida')
+                ->between(
+                    start: now()->startOfYear(),
+                    end: now()->endOfYear(),
+                )
+                ->perMonth()
+                ->sum('valor_total_desconto');
+        });
 
         return [
             'datasets' => [

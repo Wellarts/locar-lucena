@@ -9,7 +9,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class VeiculoDisponivel extends BaseWidget
 {
-   // protected int | string | array $columnSpan = 'full';
+    // protected int | string | array $columnSpan = 'full';
 
     protected static ?string $heading = 'Veículos Disponíveis';
 
@@ -19,7 +19,12 @@ class VeiculoDisponivel extends BaseWidget
     {
         return $table
             ->query(
-                Veiculo::query()->where('status',1)->where('status_locado','=', 0)->orderby('modelo', 'asc')
+                // Seleciona somente as colunas necessárias para a tabela (menos I/O)
+                Veiculo::query()
+                    ->select(['id', 'modelo', 'cor', 'ano', 'placa'])
+                    ->where('status', 1)
+                    ->where('status_locado', 0)
+                    ->orderBy('modelo', 'asc')
             )
             ->columns([
                 Tables\Columns\TextColumn::make('modelo')
@@ -28,7 +33,7 @@ class VeiculoDisponivel extends BaseWidget
                     ->label('Modelo'),
                 Tables\Columns\TextColumn::make('cor'),
                 Tables\Columns\TextColumn::make('ano'),
-                Tables\Columns\TextColumn::make('placa')
+                Tables\Columns\TextColumn::make('placa'),
             ])
             ->defaultPaginationPageOption(5);
     }

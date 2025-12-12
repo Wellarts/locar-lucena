@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Locacao;
-use App\Models\Veiculo;
 use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -11,17 +10,21 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class VeiculoChegando extends BaseWidget
 {
-
     protected static ?string $heading = 'Próximos Retornos';
 
     protected static ?int $sort = 2;
 
     public function table(Table $table): Table
     {
+        $hoje = Carbon::today();
+
         return $table
             ->query(
-                //  Veiculo::query()->where('status',1)->where('status_locado', 1)->orderby('data_retorno', 'asc')
-                Locacao::query()->where('status', 0)->orderby('data_retorno', 'asc')
+                Locacao::query()
+                    ->with('veiculo')
+                    ->where('status', 0)
+                    ->orderBy('data_retorno', 'asc')
+                    ->limit(5)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('veiculo.modelo')
@@ -36,29 +39,29 @@ class VeiculoChegando extends BaseWidget
                     ->badge()
                     ->label('Data Retorno')
                     ->date('d/m/Y')
-                    ->color(static function ($state): string {
-                        $hoje = Carbon::today();
-                        $dataRetorno = Carbon::parse($state);
-                        $qtd_dias = $hoje->diffInDays($dataRetorno, false);
-                     //  dd($qtd_dias.' - '.$dataSaida.' - '.$hoje);
-                      // echo $qtd_dias;
-
-                        if ($qtd_dias <= 3 && $qtd_dias >= 0) {
-                            return 'warning';
+                    ->color(function ($state) use ($hoje): string {
+                        if (empty($state)) {
+                            return 'secondary';
                         }
 
-                        if($qtd_dias < 0) {
+                        try {
+                            $dataRetorno = Carbon::parse($state);
+                        } catch (\Throwable $e) {
+                            return 'secondary';
+                        }
+
+                        $qtd_dias = $hoje->diffInDays($dataRetorno, false);
+
+                        if ($qtd_dias < 0) {
                             return 'danger';
                         }
 
-                        if($qtd_dias > 3) {
-                            return 'success';
+                        if ($qtd_dias <= 3) {
+                            return 'warning';
                         }
 
-
-
+                        return 'success';
                     }),
-
             ])
             ->defaultPaginationPageOption(5);
     }

@@ -29,7 +29,6 @@ class VeiculosLucratividadeResource extends Resource
     protected static ?string $navigationLabel = 'Lucratividade Geral';
 
     protected static ?string $navigationGroup = 'Consultas';
-
     
 
     
