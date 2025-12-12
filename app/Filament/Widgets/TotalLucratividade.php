@@ -28,10 +28,10 @@ class TotalLucratividade extends BaseWidget
         });
 
         return [
-            Stat::make('Veículos Ativos', $totais->total_veiculos)
-                ->description('Total cadastrados')
-                ->icon('heroicon-o-truck')
-                ->color('primary'),
+            // Stat::make('Veículos Ativos', $totais->total_veiculos)
+            //     ->description('Total cadastrados')
+            //     ->icon('heroicon-o-truck')
+            //     ->color('primary'),
             
             Stat::make('Faturamento Total', number_format($totais->total_locacoes, 2, ',', '.'))
                 ->description('Com locações')
