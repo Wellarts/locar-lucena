@@ -57,7 +57,11 @@ class LocacaoResource extends Resource
 
     protected static ?string $navigationGroup = 'Locar';
 
-
+ // Eager loading para evitar consultas N+1
+    protected static function getEagerLoadRelations(): array
+    {
+        return ['cliente', 'veiculo'];
+    }
 
     public static function form(Form $form): Form
     {
