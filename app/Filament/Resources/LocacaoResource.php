@@ -755,7 +755,7 @@ class LocacaoResource extends Resource
                     //  Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->paginated([10, 25, 50, 100,]);
+            ->paginated([10, 25, 50,]);
     }
 
     public static function getPages(): array
