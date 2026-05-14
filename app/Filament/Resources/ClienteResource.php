@@ -52,14 +52,14 @@ class ClienteResource extends Resource
                     ->columnSpanFull(),
                     Forms\Components\Select::make('estado_id')
                     ->label('Estado')
-                    ->native(false)
+                   // ->native(false)
                     ->searchable()
                     ->required()
                     ->options(Estado::all()->pluck('nome', 'id')->toArray())
                     ->reactive(),
                 Forms\Components\Select::make('cidade_id')
                     ->label('Cidade')
-                    ->native(false)
+                   // ->native(false)
                     ->searchable()
                     ->required()
                     ->options(function (callable $get) {
