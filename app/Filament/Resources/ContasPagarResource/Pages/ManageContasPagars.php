@@ -26,7 +26,8 @@ class ManageContasPagars extends ManageRecords
                             $valor_parcela = ($record->valor_total / $record->parcelas);
                             $vencimentos = Carbon::create($record->data_vencimento);
                             for ($cont = 1; $cont < $data['parcelas']; $cont++) {
-                                $dataVencimentos = $vencimentos->addDays($data['proxima_parcela']);
+                               // $dataVencimentos = $vencimentos->addDays($data['proxima_parcela']);
+                                $dataVencimentos = $vencimentos->addMonth();
                                 $parcelas = [
                                     'fornecedor_id' => $data['fornecedor_id'],
                                     'valor_total' => $data['valor_total'],
