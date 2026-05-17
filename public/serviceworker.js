@@ -1,22 +1,17 @@
-var staticCacheName = "pwa-v" + new Date().getTime();
-var filesToCache = [
+// 1. MUDANÇA CRUCIAL: Controle a versão manualmente (mude para 'v2', 'v3' quando fizer deploy)
+// Nunca use dynamic timestamps aqui, pois isso quebra o ciclo de vida do Service Worker.
+const staticCacheName = "pwa-v1.0.0"; 
+
+const filesToCache = [
     '/',
-   // '/offline',
     '/css/app.css',
     '/js/app.js',
-    // '/images/icons/icon-72x72.png',
-    // '/images/icons/icon-96x96.png',
-    // '/images/icons/icon-128x128.png',
-    // '/images/icons/icon-144x144.png',
-    // '/images/icons/icon-152x152.png',
-    // '/images/icons/icon-192x192.png',
-    // '/images/icons/icon-384x384.png',
-    // '/images/icons/icon-512x512.png',
 ];
 
 // Cache on install
 self.addEventListener("install", event => {
-    this.skipWaiting();
+    // Corrigido: Em Service Workers usa-se self.skipWaiting(), 'this' pode perder o contexto
+    self.skipWaiting(); 
     event.waitUntil(
         caches.open(staticCacheName)
             .then(cache => {
@@ -35,19 +30,33 @@ self.addEventListener('activate', event => {
                     .filter(cacheName => (cacheName !== staticCacheName))
                     .map(cacheName => caches.delete(cacheName))
             );
-        })
+        }).then(() => self.clients.claim()) // Força o SW atualizado a tomar conta das abas abertas imediatamente
     );
 });
 
-// Serve from Cache
+// Serve com estratégia correta para o Filament
 self.addEventListener("fetch", event => {
+    // Ignora requisições de fora do seu domínio ou requisições POST (comuns no Livewire)
+    if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request);
+        // Estratégia Network-First para rotas e arquivos do Filament / Livewire
+        fetch(event.request)
+            .then(networkResponse => {
+                // Se a rede responder bem e for um asset estático básico, atualiza o cache em background
+                if (networkResponse.status === 200 && filesToCache.includes(new URL(event.request.url).pathname)) {
+                    let responseClone = networkResponse.clone();
+                    caches.open(staticCacheName).then(cache => cache.put(event.request, responseClone));
+                }
+                return networkResponse;
             })
             .catch(() => {
-                return caches.match('offline');
+                // Se a rede falhar (offline), busca no cache
+                return caches.match(event.request).then(cacheResponse => {
+                    return cacheResponse || caches.match('offline');
+                });
             })
-    )
+    );
 });
